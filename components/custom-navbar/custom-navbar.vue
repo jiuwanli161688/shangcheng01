@@ -1,26 +1,36 @@
 <template>
-  <view class="custom-navbar" :style="navbarStyle">
-    <!-- 状态栏占位 -->
-    <view class="status-bar" :style="{ height: statusBarHeight + 'px', background: backgroundColor }"></view>
-    <!-- <view class="status-bar" :style="{ height: safeAreaInsets.top + 'px', background: backgroundColor }"></view> -->
-    
-    <!-- 导航栏内容 -->
+  <view class="custom-navbar-diy" :style="navbarStyle">
+    <!-- 状态栏占位，可通过 props 传入 statusBarHeight -->
+    <view
+      class="status-bar"
+      :style="{ height: innerStatusBarHeight + 'px', background: backgroundColor }"
+      v-if="innerStatusBarHeight > 0"
+    ></view>
+
     <view class="nav-content" :style="navContentStyle">
-      <!-- 返回按钮 -->
-      <view class="nav-left" @click="handleBack" v-if="showBack">
-        <view class="back-btn" :class="{ 'back-btn-active': isBackPressed }" @touchstart="onBackTouchStart" @touchend="onBackTouchEnd">
-          <text class="back-icon">‹</text>
-          <text class="back-text" v-if="showBackText">返回</text>
-        </view>
+      <!-- 左侧区块：可插槽也可显示返回 -->
+      <view class="nav-left">
+        <slot name="left">
+          <!-- <view v-if="showBack" class="back-btn" @click="handleBack"> -->
+          <view class="back-btn" :class="{ opcity: !showBack }" @click="handleBack">
+            <text class="back-icon">
+              <slot name="back-icon">‹</slot>
+            </text>
+            <text class="back-text" v-if="showBackText">
+              <slot name="back-text">返回</slot>
+            </text>
+          </view>
+        </slot>
       </view>
-      <view class="nav-left" v-else></view>
-      
-      <!-- 标题 -->
+      <!-- 标题区块，可插槽覆盖 -->
       <view class="nav-title">
-        <text class="title-text" :style="{ color: titleColor }">{{ title }}</text>
+        <slot name="title">
+          <text class="title-text" :style="{ color: titleColor }">{{
+            title
+          }}</text>
+        </slot>
       </view>
-      
-      <!-- 右侧操作 -->
+      <!-- 右侧内容插槽 -->
       <view class="nav-right">
         <slot name="right"></slot>
       </view>
@@ -30,117 +40,108 @@
 
 <script>
 export default {
-  name: 'CustomNavbar',
+  name: "CustomNavbar",
   props: {
-    title: {
-      type: String,
-      default: ''
-    },
-    showBack: {
-      type: Boolean,
-      default: false,
-    },
-    showBackText: {
-      type: Boolean,
-      default: false
-    },
-    backgroundColor: {
-      type: String,
-      default: '#ffffff'
-    },
-    titleColor: {
-      type: String,
-      default: '#303133'
-    }
+    title: { type: String, default: "" },
+    showBack: { type: Boolean, default: false },
+    showBackText: { type: Boolean, default: false },
+    backgroundColor: { type: String, default: "#F60808" },
+    titleColor: { type: String, default: "#ffffff" },
+    statusBarHeight: { type: Number, default: 0 }, // 可直接外部传入，内部自动获取
+    navBarHeight: { type: Number, default: null }, // 允许直接传入高度
+    indexPage: { type: String, default: "/pages/index/index" }, // 首页路径可配置
   },
   data() {
     return {
-      safeAreaInsets: 0,
-      statusBarHeight: 0,
-      navBarHeight: 44,
-      isBackPressed: false
-    }
+      innerStatusBarHeight: 0,
+      innerNavBarHeight: 44,
+      safeAreaInsets: { top: 0, right: 0, bottom: 0, left: 0 },
+    };
   },
   computed: {
     navbarStyle() {
-      return {
-        background: this.backgroundColor,
-      }
+      return { background: this.backgroundColor };
     },
     navContentStyle() {
       return {
-        height: this.navBarHeight + 'px',
-        background: this.backgroundColor
-      }
-    }
+        height: this.computedNavBarHeight + "px",
+        background: this.backgroundColor,
+      };
+    },
+    computedStatusBarHeight() {
+      return this.statusBarHeight || this.innerStatusBarHeight;
+    },
+    computedNavBarHeight() {
+      return this.navBarHeight || this.innerNavBarHeight;
+    },
   },
   mounted() {
-    this.getSystemInfo()
+    // 若外部未传入，则自动获取
+    if (!this.statusBarHeight || !this.navBarHeight) {
+      this.getSystemInfo();
+    }
   },
   methods: {
     getSystemInfo() {
-      const systemInfo = uni.getSystemInfoSync()
-      this.statusBarHeight = systemInfo.statusBarHeight || 0
-      this.safeAreaInsets = systemInfo.safeAreaInsets || { top: 0, right: 0, bottom: 0, left: 0 }
-      
-      // 小程序胶囊按钮位置信息
-      if (uni.getMenuButtonBoundingClientRect) {
-        try {
-          const menuButtonInfo = uni.getMenuButtonBoundingClientRect()
-          if (menuButtonInfo && menuButtonInfo.top) {
-            this.navBarHeight = (menuButtonInfo.top - this.statusBarHeight) * 2 + menuButtonInfo.height
+      // 推荐异步，提升页面性能
+      uni.getSystemInfo({
+        success: (sys) => {
+          this.innerStatusBarHeight = sys.statusBarHeight || 20;
+          this.safeAreaInsets = sys.safeAreaInsets || {
+            top: 0,
+            right: 0,
+            bottom: 0,
+            left: 0,
+          };
+          if (uni.getMenuButtonBoundingClientRect) {
+            try {
+              const mb = uni.getMenuButtonBoundingClientRect();
+              if (mb && mb.top) {
+                this.innerNavBarHeight =
+                  (mb.top - this.innerStatusBarHeight) * 2 + mb.height;
+              }
+            } catch (e) {
+              // 不做日志，仅降级默认值
+              this.innerNavBarHeight = sys.platform === "android" ? 48 : 44;
+            }
+          } else {
+            this.innerNavBarHeight = sys.platform === "android" ? 48 : 44;
           }
-        } catch (e) {
-          console.warn('获取胶囊按钮信息失败', e)
-        }
-      }
-      
-      // 默认高度（iOS 44px, Android 48px）
-      if (this.navBarHeight === 44) {
-        this.navBarHeight = systemInfo.platform === 'android' ? 48 : 44
-      }
+        },
+      });
     },
-    
     handleBack() {
+      if (!this.showBack) return;
+      // 可发送 back 事件
+      this.$emit("back");
       uni.navigateBack({
         fail: () => {
-          // 如果没有上一页，跳转到首页
-          uni.reLaunch({
-            url: '/pages/index/index'
-          })
-        }
-      })
+          uni.reLaunch({ url: this.indexPage });
+        },
+      });
     },
-    
-    onBackTouchStart() {
-      this.isBackPressed = true
-    },
-    
-    onBackTouchEnd() {
-      setTimeout(() => {
-        this.isBackPressed = false
-      }, 150)
-    }
-  }
-}
+  },
+};
 </script>
 
 <style lang="scss" scoped>
-@import '../../styles/common.scss';
-
-.custom-navbar {
+@import "../../styles/common.scss";
+.opcity {
+  opacity: 0;
+}
+.custom-navbar-diy {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
-  z-index: 9999;
-  background: $bg-color-white;
-  transition: background-color 0.3s ease;
+  z-index: 9900; // 建议统一管理z-index
+  background: $bg-color-red;
+  transition: background-color 0.3s;
 }
 
 .status-bar {
   width: 100%;
-  transition: background-color 0.3s ease;
+  transition: background-color 0.3s;
 }
 
 .nav-content {
@@ -149,19 +150,20 @@ export default {
   justify-content: space-between;
   padding: 0 30rpx;
   position: relative;
-  transition: background-color 0.3s ease, box-shadow 0.3s ease;
-  
+  height: 100%;
+  transition: background-color 0.3s, box-shadow 0.3s;
   &::after {
-    content: '';
+    content: "";
     position: absolute;
     left: 0;
     bottom: 0;
     width: 100%;
     height: 1rpx;
-    background: linear-gradient(90deg, 
-      transparent 0%, 
-      rgba(0, 0, 0, 0.06) 20%, 
-      rgba(0, 0, 0, 0.06) 80%, 
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(0, 0, 0, 0.06) 20%,
+      rgba(0, 0, 0, 0.06) 80%,
       transparent 100%
     );
     opacity: 0.6;
@@ -182,34 +184,26 @@ export default {
   padding: 12rpx 16rpx;
   margin-left: -16rpx;
   border-radius: 12rpx;
-  transition: all 0.2s ease;
+  transition: all 0.2s;
   position: relative;
-  
+  // 直接用:active实现按压态
   &:active {
     background: rgba(0, 0, 0, 0.05);
-    transform: scale(0.95);
-  }
-  
-  &.back-btn-active {
-    background: rgba(0, 0, 0, 0.05);
-    transform: scale(0.95);
+    transform: scale(0.96);
   }
 }
-
 .back-icon {
   font-size: 48rpx;
   font-weight: 300;
   color: $text-color-primary;
-  line-height: 1;
   margin-right: 4rpx;
-  transition: color 0.2s ease;
+  transition: color 0.2s;
 }
 
 .back-text {
-  font-size: 28rpx;
+  font-size: 32rpx;
   color: $text-color-regular;
-  line-height: 1;
-  transition: color 0.2s ease;
+  transition: color 0.2s;
 }
 
 .nav-title {
@@ -218,19 +212,16 @@ export default {
   padding: 0 20rpx;
   overflow: hidden;
 }
-
 .title-text {
   font-size: 34rpx;
   font-weight: 600;
   color: $text-color-primary;
-  line-height: 1.2;
   display: block;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  transition: color 0.3s ease;
+  transition: color 0.3s;
 }
-
 .nav-right {
   min-width: 120rpx;
   display: flex;
