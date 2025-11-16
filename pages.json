@@ -1,6 +1,13 @@
 {
   "pages": [
     {
+      "path": "pages/user/setting",
+      "style": {
+        "navigationBarTitleText": "个人设置",
+        "navigationStyle": "custom"
+      }
+    },
+    {
       "path": "pages/user/user",
       "style": {
         "navigationBarTitleText": "个人中心",
