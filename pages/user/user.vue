@@ -1,421 +1,553 @@
 <template>
-  <view class="page-user">
-    <!-- 用户信息头部 -->
-    <view class="user-header">
-      <view class="user-info" @click="handleUserInfoClick">
-        <image class="avatar" :src="userAvatar" mode="aspectFit"></image>
-        <view class="user-detail">
-          <text class="username">{{ userName }}</text>
-          <text class="user-level" v-if="isVip">VIP会员</text>
-          <text class="login-tip" v-else>点击登录</text>
+  <view class="member-page">
+    <!-- 顶部状态栏 -->
+    <custom-navbar title="会员中心" textAlign="left" />
+    <!-- 红色头部区域 -->
+    <view
+      class="header-section"
+      :style="{ marginTop: getTopHeight() - 5 + 'px' }"
+    >
+      <!-- 用户信息 -->
+      <view class="user-info">
+        <image
+          class="avatar"
+          src="https://img2.baidu.com/it/u=2612741288,182099192&fm=253&fmt=auto&app=138&f=JPEG?w=513&h=500"
+          mode="aspectFill"
+        ></image>
+        <view class="user-details">
+          <view class="name-row">
+            <text class="username">子墨</text>
+            <view class="vip-badge">
+              <text class="vip-icon">👑</text>
+              <text class="vip-text">洋墨柜</text>
+            </view>
+          </view>
+          <text class="user-id">用户ID：CXJZ0Z50001</text>
         </view>
-      </view>
-      <view class="settings" @click="handleSettingsClick">
-        <image src="/static/icons/settings.png" mode="aspectFit"></image>
+        <view class="user-actions">
+          <view class="action-icon">
+            <image
+              src="https://img2.baidu.com/it/u=2612741288,182099192&fm=253&fmt=auto&app=138&f=JPEG?w=513&h=500"
+              mode="aspectFill"
+            ></image>
+          </view>
+          <view class="action-icon">
+            <image
+              src="https://img2.baidu.com/it/u=2612741288,182099192&fm=253&fmt=auto&app=138&f=JPEG?w=513&h=500"
+              mode="aspectFill"
+            ></image>
+          </view>
+        </view>
       </view>
     </view>
 
-    <!-- 订单状态 -->
+    <!-- 我的订单 -->
     <view class="order-section">
-      <view class="section-header" @click="handleOrderListClick">
+      <view class="section-header">
         <text class="section-title">我的订单</text>
-        <view class="section-more">
-          <text>查看全部</text>
-          <image src="/static/icons/arrow-right.png" mode="aspectFit"></image>
+        <view class="more-btn" @click="goToOrders">
+          <text class="more-text">更多</text>
+          <image
+            class="arrow"
+            src="/static/images/user/right.png"
+            mode="aspectFill"
+          ></image>
         </view>
       </view>
-      
-      <view class="order-status">
-        <view class="status-item" @click="handleOrderStatusClick(0)">
-          <image src="/static/icons/order-pending.png" mode="aspectFit"></image>
-          <text>待付款</text>
-          <view class="badge" v-if="orderStats.pendingPayment > 0">{{ orderStats.pendingPayment }}</view>
-        </view>
-        <view class="status-item" @click="handleOrderStatusClick(1)">
-          <image src="/static/icons/order-shipping.png" mode="aspectFit"></image>
-          <text>待发货</text>
-          <view class="badge" v-if="orderStats.pendingShipping > 0">{{ orderStats.pendingShipping }}</view>
-        </view>
-        <view class="status-item" @click="handleOrderStatusClick(2)">
-          <image src="/static/icons/order-delivery.png" mode="aspectFit"></image>
-          <text>待收货</text>
-          <view class="badge" v-if="orderStats.pendingReceipt > 0">{{ orderStats.pendingReceipt }}</view>
-        </view>
-        <view class="status-item" @click="handleOrderStatusClick(3)">
-          <image src="/static/icons/order-review.png" mode="aspectFit"></image>
-          <text>待评价</text>
-          <view class="badge" v-if="orderStats.pendingReview > 0">{{ orderStats.pendingReview }}</view>
-        </view>
-        <view class="status-item" @click="handleOrderStatusClick(4)">
-          <image src="/static/icons/order-refund.png" mode="aspectFit"></image>
-          <text>退款/售后</text>
-          <view class="badge" v-if="orderStats.refund > 0">{{ orderStats.refund }}</view>
+      <view class="order-tabs">
+        <view
+          class="order-tab"
+          v-for="(item, index) in orderTabs"
+          :key="index"
+          @click="goToOrderList(item.type)"
+        >
+          <view class="tab-icon-wrap">
+            <!-- <text class="tab-icon">{{ item.icon }}</text> -->
+            <image class="tab-icon" :src="item.icon"></image>
+            <view v-if="item.badge" class="badge">{{ item.badge }}</view>
+          </view>
+          <text class="tab-label">{{ item.label }}</text>
         </view>
       </view>
     </view>
 
-    <!-- 功能菜单 -->
-    <view class="menu-section">
-      <view class="menu-grid">
-        <view class="menu-item" @click="handleMenuClick('coupon')">
-          <image src="/static/icons/coupon.png" mode="aspectFit"></image>
-          <text>优惠券</text>
-        </view>
-        <view class="menu-item" @click="handleMenuClick('collect')">
-          <image src="/static/icons/collect.png" mode="aspectFit"></image>
-          <text>我的收藏</text>
-        </view>
-        <view class="menu-item" @click="handleMenuClick('address')">
-          <image src="/static/icons/address.png" mode="aspectFit"></image>
-          <text>地址管理</text>
-        </view>
-        <view class="menu-item" @click="handleMenuClick('service')">
-          <image src="/static/icons/service.png" mode="aspectFit"></image>
-          <text>客服中心</text>
+    <!-- 我的钱包 -->
+    <view class="wallet-section">
+      <view class="section-header">
+        <text class="section-title">我的钱包</text>
+        <view class="manage-btn" @click="goToShopManage">
+          <image
+            class="manage-icon"
+            src="/static/images/user/dianpu.png"
+            mode="aspectFill"
+          ></image>
+          <text class="manage-text">管理店铺</text>
+          <image
+            class="arrow"
+            src="/static/images/user/right.png"
+            mode="aspectFill"
+          ></image>
         </view>
       </view>
-      
-      <view class="menu-grid">
-        <view class="menu-item" @click="handleMenuClick('about')">
-          <image src="/static/icons/about.png" mode="aspectFit"></image>
-          <text>关于我们</text>
+      <view class="wallet-items">
+        <view class="wallet-item">
+          <text class="wallet-amount">{{ balance }}</text>
+          <text class="wallet-label">余额(元)</text>
         </view>
-        <view class="menu-item" @click="handleMenuClick('feedback')">
-          <image src="/static/icons/feedback.png" mode="aspectFit"></image>
-          <text>意见反馈</text>
+        <view class="wallet-item">
+          <text class="wallet-amount">{{ redPackets }}</text>
+          <text class="wallet-label">可用红包(个)</text>
         </view>
-        <view class="menu-item" @click="handleMenuClick('share')">
-          <image src="/static/icons/share.png" mode="aspectFit"></image>
-          <text>分享应用</text>
-        </view>
-        <view class="menu-item" @click="handleMenuClick('logout')" v-if="isLogin">
-          <image src="/static/icons/logout.png" mode="aspectFit"></image>
-          <text>退出登录</text>
+        <view class="wallet-item">
+          <text class="wallet-amount">{{ coupons }}</text>
+          <text class="wallet-label">可用卡券(张)</text>
         </view>
       </view>
     </view>
+
+    <!-- 商家入驻横幅 -->
+    <view class="banner-section" @click="goToMerchantRegister">
+      <custom-swiper
+        :info="swiperInfo"
+        @img-click="bannerClick"
+      ></custom-swiper>
+    </view>
+    <!-- 菜单列表 -->
+    <view class="menu-list">
+      <view
+        class="menu-item"
+        v-for="(item, index) in menuList"
+        :key="index"
+        @click="goToPage(item.path)"
+      >
+        <view class="menu-left">
+          <!-- <text class="menu-icon" :style="{ color: item.color }">{{
+            item.icon
+          }}</text> -->
+          <image class="menu-icon" :src="item.icon"></image>
+          <text class="menu-text">{{ item.label }}</text>
+        </view>
+        <image
+          class="arrow"
+          src="/static/images/user/right.png"
+          mode="aspectFill"
+        ></image>
+      </view>
+    </view>
+
+    <!-- 底部占位 -->
+    <view class="bottom-placeholder"></view>
   </view>
 </template>
 
 <script>
-import { mapState, mapGetters, mapActions } from 'vuex'
+import CustomNavbar from "@/components/custom-navbar/custom-navbar";
+import CustomSwiper from "@/components/custom-swiper/custom-swiper";
+import { getNavBarHeight } from "@/utils/utils";
+import userImg from "@/static/images/user/user.png";
 
 export default {
-  computed: {
-    ...mapState('user', ['isLogin']),
-    ...mapGetters('user', ['userAvatar', 'userName', 'isVip']),
-    
-    orderStats() {
-      return {
-        pendingPayment: 0,
-        pendingShipping: 0,
-        pendingReceipt: 0,
-        pendingReview: 0,
-        refund: 0
-      }
-    }
+  components: {
+    CustomNavbar,
   },
-
+  data() {
+    return {
+      statusBarHeight: 0,
+      balance: "10023.25",
+      redPackets: 0,
+      coupons: 0,
+      orderTabs: [
+        { icon: userImg, label: "待付款", type: "unpaid", badge: 0 },
+        { icon: userImg, label: "待发货", type: "unshipped", badge: 1 },
+        { icon: userImg, label: "待收货", type: "shipped", badge: 0 },
+        { icon: userImg, label: "已完成", type: "completed", badge: 0 },
+      ],
+      menuList: [
+        {
+          icon: userImg,
+          label: "收货地址",
+          path: "/pages/address/address",
+          color: "#F60808",
+        },
+        {
+          icon: userImg,
+          label: '待收货',
+          path: "/pages/favorites/favorites",
+          color: "#4A90E2",
+        },
+        {
+          icon: userImg,
+          label: "支付密码",
+          path: "/pages/password/password",
+          color: "#F60808",
+        },
+        {
+          icon: userImg,
+          label: "帮助中心",
+          path: "/pages/help/help",
+          color: "#4A90E2",
+        },
+      ],
+      swiperInfo: [
+        {
+          colorClass: "uni-bg-red",
+          url: "https://web-assets.dcloud.net.cn/unidoc/zh/shuijiao.jpg",
+          content: "内容 A",
+        },
+        {
+          colorClass: "uni-bg-green",
+          url: "https://wxls-cms.oss-cn-hangzhou.aliyuncs.com/online/2024-04-18/218da022-f4bf-456a-99af-5cb8e157f7b8.jpg",
+          content: "内容 B",
+        },
+        {
+          colorClass: "uni-bg-blue",
+          url: "https://vkceyugu.cdn.bspapp.com/VKCEYUGU-dc-site/094a9dc0-50c0-11eb-b680-7980c8a877b8.jpg",
+          content: "内容 C",
+        },
+      ],
+    };
+  },
   onLoad() {
-    this.loadUserData()
-  },
+    // 获取状态栏高度
+    const systemInfo = uni.getSystemInfoSync();
+    this.statusBarHeight = systemInfo.statusBarHeight;
 
-  onShow() {
-    this.loadUserData()
+    // 加载用户数据
+    this.loadUserData();
   },
-
-  onPullDownRefresh() {
-    this.loadUserData().finally(() => {
-      uni.stopPullDownRefresh()
-    })
-  },
-
   methods: {
-    ...mapActions('user', ['getUserInfo', 'logout']),
-
-    async loadUserData() {
-      if (this.isLogin) {
-        try {
-          await this.getUserInfo()
-        } catch (error) {
-          console.error('用户数据加载失败:', error)
-        }
-      }
+    getTopHeight: getNavBarHeight,
+    bannerClick(item) {
+      console.log("广告点击", item);
     },
-
-    // 用户信息点击
-    handleUserInfoClick() {
-      if (!this.isLogin) {
-        uni.navigateTo({
-          url: '/subpackages/auth/pages/login'
-        })
-      } else {
-        uni.navigateTo({
-          url: '/pages/user/profile'
-        })
-      }
+    loadUserData() {
+      // 这里可以调用API获取用户数据
+      // uni.request({...})
     },
-
-    // 设置点击
-    handleSettingsClick() {
+    goToOrders() {
       uni.navigateTo({
-        url: '/pages/user/settings'
-      })
+        url: "/pages/orders/orders",
+      });
     },
-
-    // 订单列表点击
-    handleOrderListClick() {
-      if (!this.$checkLogin()) return
-      
+    goToOrderList(type) {
       uni.navigateTo({
-        url: '/subpackages/order/pages/list'
-      })
+        url: `/pages/orders/orders?type=${type}`,
+      });
     },
-
-    // 订单状态点击
-    handleOrderStatusClick(status) {
-      if (!this.$checkLogin()) return
-      
+    goToShopManage() {
       uni.navigateTo({
-        url: `/subpackages/order/pages/list?status=${status}`
-      })
+        url: "/pages/shop/manage",
+      });
     },
-
-    // 菜单点击
-    handleMenuClick(type) {
-      switch (type) {
-        case 'coupon':
-          if (!this.$checkLogin()) return
-          uni.navigateTo({
-            url: '/pages/user/coupon'
-          })
-          break
-        case 'collect':
-          if (!this.$checkLogin()) return
-          uni.navigateTo({
-            url: '/pages/user/collect'
-          })
-          break
-        case 'address':
-          if (!this.$checkLogin()) return
-          uni.navigateTo({
-            url: '/subpackages/address/pages/list'
-          })
-          break
-        case 'service':
-          uni.makePhoneCall({
-            phoneNumber: '400-123-4567'
-          })
-          break
-        case 'about':
-          uni.navigateTo({
-            url: '/pages/about/index'
-          })
-          break
-        case 'feedback':
-          uni.navigateTo({
-            url: '/pages/feedback/index'
-          })
-          break
-        case 'share':
-          this.handleShare()
-          break
-        case 'logout':
-          this.handleLogout()
-          break
-      }
+    goToMerchantRegister() {
+      uni.navigateTo({
+        url: "/pages/merchant/register",
+      });
     },
-
-    // 分享
-    handleShare() {
-      uni.showShareMenu({
-        withShareTicket: true
-      })
+    goToPage(path) {
+      uni.navigateTo({
+        url: path,
+      });
     },
-
-    // 退出登录
-    handleLogout() {
-      uni.showModal({
-        title: '提示',
-        content: '确定要退出登录吗？',
-        success: async (res) => {
-          if (res.confirm) {
-            try {
-              await this.logout()
-              uni.showToast({
-                title: '退出成功',
-                icon: 'success'
-              })
-            } catch (error) {
-              console.error('退出登录失败:', error)
-            }
-          }
-        }
-      })
-    }
-  }
-}
+  },
+};
 </script>
 
-<style lang="scss" scoped>
-.page-user {
-  min-height: 100vh;
-  background: $bg-color;
+<style scoped>
+.member-page {
+  height: 100vh;
+  overflow-y: auto;
+  background-color: #f5f5f5;
+}
 
-  .user-header {
-    background: linear-gradient(135deg, $primary-color, lighten($primary-color, 10%));
-    padding: 60rpx 30rpx 40rpx;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+.status-bar {
+  background: linear-gradient(135deg, #f60808 0%, #f60808 100%);
+}
 
-    .user-info {
-      display: flex;
-      align-items: center;
-      
-      .avatar {
-        width: 120rpx;
-        height: 120rpx;
-        border-radius: 50%;
-        border: 4rpx solid rgba(255, 255, 255, 0.3);
-        margin-right: 20rpx;
-      }
-      
-      .user-detail {
-        display: flex;
-        flex-direction: column;
-        
-        .username {
-          font-size: 36rpx;
-          color: #fff;
-          font-weight: bold;
-          margin-bottom: 10rpx;
-        }
-        
-        .user-level, .login-tip {
-          font-size: 24rpx;
-          color: rgba(255, 255, 255, 0.8);
-        }
-        
-        .user-level {
-          background: rgba(255, 255, 255, 0.2);
-          padding: 6rpx 12rpx;
-          border-radius: 20rpx;
-          align-self: flex-start;
-        }
-      }
-    }
-    
-    .settings {
-      image {
-        width: 40rpx;
-        height: 40rpx;
-      }
-    }
-  }
+/* 红色头部区域 */
+.header-section {
+  background: linear-gradient(135deg, #f60808 0%, #f60808 100%);
+  padding: 36rpx 32rpx 64rpx;
+}
 
-  .order-section {
-    background: #fff;
-    margin: 20rpx;
-    padding: 30rpx;
-    
-    .section-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 30rpx;
-      
-      .section-title {
-        font-size: 32rpx;
-        font-weight: bold;
-        color: $text-color-primary;
-      }
-      
-      .section-more {
-        display: flex;
-        align-items: center;
-        
-        text {
-          font-size: 24rpx;
-          color: $text-color-light;
-          margin-right: 10rpx;
-        }
-        
-        image {
-          width: 24rpx;
-          height: 24rpx;
-        }
-      }
-    }
-    
-    .order-status {
-      display: flex;
-      justify-content: space-around;
-      
-      .status-item {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        position: relative;
-        
-        image {
-          width: 60rpx;
-          height: 60rpx;
-          margin-bottom: 10rpx;
-        }
-        
-        text {
-          font-size: 24rpx;
-          color: $text-color-regular;
-        }
-        
-        .badge {
-          position: absolute;
-          top: -10rpx;
-          right: 0;
-          background: $danger-color;
-          color: #fff;
-          font-size: 20rpx;
-          min-width: 30rpx;
-          height: 30rpx;
-          border-radius: 15rpx;
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          padding: 0 8rpx;
-        }
-      }
-    }
-  }
+.header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24rpx 0;
+}
 
-  .menu-section {
-    background: #fff;
-    margin: 20rpx;
-    
-    .menu-grid {
-      display: flex;
-      flex-wrap: wrap;
-      padding: 20rpx 0;
-      
-      .menu-item {
-        width: 25%;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        padding: 30rpx 0;
-        
-        image {
-          width: 60rpx;
-          height: 60rpx;
-          margin-bottom: 15rpx;
-        }
-        
-        text {
-          font-size: 24rpx;
-          color: $text-color-regular;
-        }
-      }
-    }
-  }
+.title {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #ffffff;
+}
+
+.header-actions {
+  display: flex;
+  gap: 24rpx;
+}
+
+.icon-btn {
+  width: 64rpx;
+  height: 64rpx;
+  border: 2rpx solid rgba(255, 255, 255, 0.5);
+  border-radius: 32rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32rpx;
+}
+
+/* 用户信息 */
+.user-info {
+  display: flex;
+  align-items: center;
+  margin-top: 20rpx;
+}
+
+.avatar {
+  width: 108rpx;
+  height: 108rpx;
+  border-radius: 50%;
+  border: 4rpx solid #ffffff;
+}
+
+.user-details {
+  flex: 1;
+  margin-left: 24rpx;
+}
+
+.name-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 12rpx;
+}
+
+.username {
+  font-size: 40rpx;
+  font-weight: bold;
+  color: #ffffff;
+  margin-right: 16rpx;
+}
+
+.vip-badge {
+  background: #ffa500;
+  padding: 0rpx 16rpx;
+  border-radius: 16rpx;
+  display: flex;
+  align-items: center;
+  gap: 4rpx;
+}
+
+.vip-icon {
+  font-size: 24rpx;
+}
+
+.vip-text {
+  font-size: 22rpx;
+  color: #ffffff;
+}
+
+.user-id {
+  font-size: 26rpx;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.user-actions {
+  display: flex;
+  gap: 20rpx;
+  height: 96rpx;
+  margin-top: 6rpx;
+}
+
+.action-icon {
+  display: flex;
+  justify-content: center;
+}
+.action-icon image {
+  width: 44rpx;
+  height: 44rpx;
+  border-radius: 50%;
+}
+
+/* 我的订单 */
+.order-section {
+  background: #ffffff;
+  margin-top: -20rpx;
+  padding: 32rpx;
+  z-index: 2;
+  border-top-left-radius: 20rpx;
+  border-top-right-radius: 20rpx;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 32rpx;
+}
+
+.section-title {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #101010;
+}
+
+.more-btn {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+}
+
+.more-text {
+  font-size: 26rpx;
+}
+
+.arrow {
+  width: 28rpx;
+  height: 28rpx;
+}
+
+.order-tabs {
+  display: flex;
+  justify-content: space-around;
+}
+
+.order-tab {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16rpx;
+}
+
+.tab-icon-wrap {
+  position: relative;
+  width: 80rpx;
+  /* height: 80rpx; */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tab-icon {
+  font-size: 48rpx;
+  width: 80rpx;
+  height: 60rpx;
+}
+
+.badge {
+  position: absolute;
+  top: -4rpx;
+  right: -4rpx;
+  border: 2rpx solid #f60808;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20rpx;
+  color: #f60808;
+  padding: 0 6rpx;
+}
+
+.tab-label {
+  font-size: 26rpx;
+}
+
+/* 我的钱包 */
+.wallet-section {
+  background: #ffffff;
+  margin-top: 12rpx;
+  padding: 32rpx;
+}
+
+.manage-btn {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+}
+
+.manage-icon {
+  width: 32rpx;
+  height: 32rpx;
+}
+
+.manage-text {
+  font-size: 26rpx;
+  color: #101010;
+}
+
+.wallet-items {
+  display: flex;
+  justify-content: space-around;
+  margin-top: 32rpx;
+}
+
+.wallet-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16rpx;
+}
+
+.wallet-amount {
+  font-size: 44rpx;
+  font-weight: bold;
+  color: #f60808;
+}
+
+.wallet-label {
+  font-size: 26rpx;
+  color: #999999;
+}
+
+/* 商家入驻横幅 */
+.banner-section {
+  margin: 12rpx 0;
+  box-sizing: border-box;
+}
+
+.banner-img {
+  width: 100%;
+  border-radius: 16rpx;
+}
+
+/* 菜单列表 */
+.menu-list {
+  background: #ffffff;
+  margin-top: 12rpx;
+  padding: 0 32rpx;
+}
+
+.menu-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 32rpx 0;
+  border-bottom: 2rpx solid #f5f5f5;
+}
+
+.menu-item:last-child {
+  border-bottom: none;
+}
+
+.menu-left {
+  display: flex;
+  align-items: center;
+  gap: 24rpx;
+}
+
+.menu-icon {
+  font-size: 40rpx;
+  width: 40rpx;
+  height: 40rpx;
+}
+
+.menu-text {
+  font-size: 30rpx;
+}
+
+.bottom-placeholder {
+  height: 40rpx;
 }
 </style>

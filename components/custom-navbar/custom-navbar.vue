@@ -9,9 +9,8 @@
 
     <view class="nav-content" :style="navContentStyle">
       <!-- 左侧区块：可插槽也可显示返回 -->
-      <view class="nav-left">
+      <view v-if="showBack" class="nav-left">
         <slot name="left">
-          <!-- <view v-if="showBack" class="back-btn" @click="handleBack"> -->
           <view class="back-btn" :class="{ opcity: !showBack }" @click="handleBack">
             <text class="back-icon">
               <slot name="back-icon">‹</slot>
@@ -22,10 +21,11 @@
           </view>
         </slot>
       </view>
+      <view v-else-if="textAlign !== 'left'" class="nav-left-def"></view>
       <!-- 标题区块，可插槽覆盖 -->
       <view class="nav-title">
         <slot name="title">
-          <text class="title-text" :style="{ color: titleColor }">{{
+          <text class="title-text" :style="{ color: titleColor, textAlign: textAlign }">{{
             title
           }}</text>
         </slot>
@@ -47,6 +47,7 @@ export default {
     showBackText: { type: Boolean, default: false },
     backgroundColor: { type: String, default: "#F60808" },
     titleColor: { type: String, default: "#ffffff" },
+    textAlign: { type: String, default: "center" },
     statusBarHeight: { type: Number, default: 0 }, // 可直接外部传入，内部自动获取
     navBarHeight: { type: Number, default: null }, // 允许直接传入高度
     indexPage: { type: String, default: "/pages/index/index" }, // 首页路径可配置
@@ -148,7 +149,7 @@ export default {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 30rpx;
+  padding: 12rpx 30rpx;
   position: relative;
   height: 100%;
   transition: background-color 0.3s, box-shadow 0.3s;
@@ -176,12 +177,14 @@ export default {
   min-width: 120rpx;
   height: 100%;
 }
+.nav-left-def {
+  min-width: 120rpx;
+}
 
 .back-btn {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 12rpx 16rpx;
   margin-left: -16rpx;
   border-radius: 12rpx;
   transition: all 0.2s;
@@ -209,7 +212,7 @@ export default {
 .nav-title {
   flex: 1;
   text-align: center;
-  padding: 0 20rpx;
+  // padding: 0 20rpx;
   overflow: hidden;
 }
 .title-text {
