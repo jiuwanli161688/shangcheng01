@@ -158,30 +158,15 @@
       </view>
     </scroll-view>
 
-    <!-- 底部导航栏 -->
-    <view class="tabbar">
-      <view class="tab-item active">
-        <image class="tab-icon" src="/static/icons/home-active.png" mode="aspectFit"></image>
-        <text class="tab-text active">首页</text>
-      </view>
-      <view class="tab-item">
-        <image class="tab-icon" src="/static/icons/category.png" mode="aspectFit"></image>
-        <text class="tab-text">分类</text>
-      </view>
-      <view class="tab-item">
-        <image class="tab-icon" src="/static/icons/cart.png" mode="aspectFit"></image>
-        <text class="tab-text">购物车</text>
-      </view>
-      <view class="tab-item">
-        <image class="tab-icon" src="/static/icons/user.png" mode="aspectFit"></image>
-        <text class="tab-text">我的</text>
-      </view>
-    </view>
   </view>
 </template>
 
 <script>
+import ShareCanvas from './components/share-canvas.vue'
 export default {
+  components: {
+    ShareCanvas
+  },
   data() {
     return {
       banners: [
@@ -787,34 +772,4 @@ export default {
   line-height: 2;
 }
 
-/* 底部导航栏 */
-.tabbar {
-  display: flex;
-  background-color: #fff;
-  border-top: 1rpx solid #e0e0e0;
-  padding: 16rpx 0;
-  padding-bottom: calc(16rpx + env(safe-area-inset-bottom));
-}
-
-.tab-item {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8rpx;
-}
-
-.tab-icon {
-  width: 48rpx;
-  height: 48rpx;
-}
-
-.tab-text {
-  font-size: 22rpx;
-  color: #666;
-  
-  &.active {
-    color: #e64340;
-  }
-}
 </style>
