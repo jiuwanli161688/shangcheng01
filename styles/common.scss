@@ -1,0 +1,56 @@
+// 颜色变量
+$primary-color: #FF6A3C;
+$success-color: #67C23A;
+$warning-color: #E6A23C;
+$danger-color: #F56C6C;
+$info-color: #909399;
+
+// 文字颜色
+$text-color-primary: #303133;
+$text-color-regular: #606266;
+$text-color-secondary: #909399;
+$text-color-placeholder: #C0C4CC;
+$text-color-light: #999999;
+
+// 背景颜色
+$bg-color: #f8f8f8;
+$bg-color-white: #ffffff;
+$bg-color-gray: #f2f2f2;
+
+// 边框颜色
+$border-color-base: #DCDFE6;
+$border-color-light: #E4E7ED;
+$border-color-lighter: #EBEEF5;
+$border-color-extra-light: #F2F6FC;
+
+// 边框圆角
+$border-radius-small: 4rpx;
+$border-radius-base: 8rpx;
+$border-radius-medium: 12rpx;
+$border-radius-round: 20rpx;
+$border-radius-circle: 50%;
+
+// 阴影
+$box-shadow-light: 0 2rpx 12rpx 0 rgba(0, 0, 0, 0.1);
+$box-shadow-base: 0 2rpx 4rpx rgba(0, 0, 0, .12), 0 0 6rpx rgba(0, 0, 0, .04);
+$box-shadow-dark: 0 2rpx 4rpx rgba(0, 0, 0, .12), 0 0 6rpx rgba(0, 0, 0, .12);
+
+// 字体大小
+$font-size-extra-small: 20rpx;
+$font-size-small: 24rpx;
+$font-size-base: 28rpx;
+$font-size-medium: 32rpx;
+$font-size-large: 36rpx;
+$font-size-extra-large: 40rpx;
+
+// 间距
+$spacing-xs: 10rpx;
+$spacing-sm: 20rpx;
+$spacing-base: 30rpx;
+$spacing-lg: 40rpx;
+$spacing-xl: 50rpx;
+
+// 高度
+$height-base: 80rpx;
+$height-small: 60rpx;
+$height-large: 100rpx;
