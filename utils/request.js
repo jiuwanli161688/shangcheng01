@@ -1,4 +1,4 @@
-const BASE_URL = 'https://your-api-domain.com/api'
+const BASE_URL = 'https://cxjpft.zxdr.cc'
 
 class Request {
   constructor() {
@@ -33,12 +33,14 @@ class Request {
       let requestOptions = await this.runInterceptors('request', options)
       
       return new Promise((resolve, reject) => {
+        console.log("请求收到---request", requestOptions)
         uni.request({
           url: BASE_URL + requestOptions.url,
           method: requestOptions.method || 'GET',
           data: requestOptions.data || {},
           header: {
-            'Content-Type': 'application/json',
+            // 'Content-Type': 'application/json',
+            'Content-Type': 'application/x-www-form-urlencoded',
             ...requestOptions.header
           },
           success: async (res) => {

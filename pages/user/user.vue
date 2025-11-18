@@ -141,6 +141,7 @@
 </template>
 
 <script>
+import { mapState, mapGetters, mapActions } from "vuex";
 import CustomNavbar from "@/components/custom-navbar/custom-navbar";
 import CustomSwiper from "@/components/custom-swiper/custom-swiper";
 import { getNavBarHeight } from "@/utils/utils";
@@ -171,7 +172,7 @@ export default {
         },
         {
           icon: userImg,
-          label: '待收货',
+          label: "待收货",
           path: "/pages/favorites/favorites",
           color: "#4A90E2",
         },
@@ -214,9 +215,32 @@ export default {
 
     // 加载用户数据
     this.loadUserData();
+    this.getLogin();
   },
   methods: {
+    ...mapActions('user', ['login']),
     getTopHeight: getNavBarHeight,
+    getLogin() {
+      const that = this;
+      uni.login({
+        provider: "weixin", //使用微信登录
+        success: async function (loginRes) {
+          console.log('微信',loginRes);
+          const res = await that.login({
+            grant_type: 'weChat',
+            tenantId: '000000',
+            code: loginRes.code,
+            logonType: 1,
+          })
+          console.log('令牌结果',res);
+
+        },
+        fail: (err) => {
+          console.log('失败',err);
+
+        }
+      });
+    },
     bannerClick(item) {
       console.log("广告点击", item);
     },

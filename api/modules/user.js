@@ -2,7 +2,7 @@ import { http } from '@/utils/request'
 
 // 用户登录
 export function login(data) {
-  return http.post('/user/login', data)
+  return http.post('/blade-auth/oauth/token', data)
 }
 
 // 用户注册
