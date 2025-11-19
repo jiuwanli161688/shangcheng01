@@ -121,9 +121,6 @@
         @click="goToPage(item.path)"
       >
         <view class="menu-left">
-          <!-- <text class="menu-icon" :style="{ color: item.color }">{{
-            item.icon
-          }}</text> -->
           <image class="menu-icon" :src="item.icon"></image>
           <text class="menu-text">{{ item.label }}</text>
         </view>
@@ -137,6 +134,10 @@
 
     <!-- 底部占位 -->
     <view class="bottom-placeholder"></view>
+    <!--  -->
+    <picker @change="bindPickerChange" :value="sexIndex" :range="sexRange">
+      <view class="uni-input">{{sexRange[sexIndex].label}}</view>
+    </picker>
   </view>
 </template>
 
@@ -145,7 +146,10 @@ import { mapState, mapGetters, mapActions } from "vuex";
 import CustomNavbar from "@/components/custom-navbar/custom-navbar";
 import CustomSwiper from "@/components/custom-swiper/custom-swiper";
 import { getNavBarHeight } from "@/utils/utils";
-import userImg from "@/static/images/user/user.png";
+import dfk from "@/static/images/user/dfk.png";
+import dfh from "@/static/images/user/dfh.png";
+import dsh from "@/static/images/user/dsh.png";
+import ywc from "@/static/images/user/ywc.png";
 
 export default {
   components: {
@@ -153,37 +157,43 @@ export default {
   },
   data() {
     return {
+      sexIndex: 0,
+      sexRange: [
+        { value: 0, label: '未知' },
+        { value: 1, label: '男' },
+        { value: 2, label: '女' },
+      ],
       statusBarHeight: 0,
       balance: "10023.25",
       redPackets: 0,
       coupons: 0,
       orderTabs: [
-        { icon: userImg, label: "待付款", type: "unpaid", badge: 0 },
-        { icon: userImg, label: "待发货", type: "unshipped", badge: 1 },
-        { icon: userImg, label: "待收货", type: "shipped", badge: 0 },
-        { icon: userImg, label: "已完成", type: "completed", badge: 0 },
+        { icon: dfk, label: "待付款", type: "unpaid", badge: 0 },
+        { icon: dfh, label: "待发货", type: "unshipped", badge: 1 },
+        { icon: dsh, label: "待收货", type: "shipped", badge: 0 },
+        { icon: ywc, label: "已完成", type: "completed", badge: 0 },
       ],
       menuList: [
         {
-          icon: userImg,
+          icon: '/static/images/user/shdz.png',
           label: "收货地址",
           path: "/pages/address/address",
           color: "#F60808",
         },
         {
-          icon: userImg,
-          label: "待收货",
+          icon: '/static/images/user/spsc.png',
+          label: "商品收藏",
           path: "/pages/favorites/favorites",
           color: "#4A90E2",
         },
         {
-          icon: userImg,
+          icon: '/static/images/user/zfmm.png',
           label: "支付密码",
           path: "/pages/password/password",
           color: "#F60808",
         },
         {
-          icon: userImg,
+          icon: '/static/images/user/bzzx.png',
           label: "帮助中心",
           path: "/pages/help/help",
           color: "#4A90E2",
@@ -220,6 +230,10 @@ export default {
   methods: {
     ...mapActions('user', ['login']),
     getTopHeight: getNavBarHeight,
+    bindPickerChange(inx) {
+      this.sexIndex = inx;
+      console.log('inx', inx)
+    },
     getLogin() {
       const that = this;
       uni.login({
@@ -269,6 +283,19 @@ export default {
       });
     },
     goToPage(path) {
+      // 检查登录状态
+      const token = uni.getStorageSync('token');
+      if (!token) {
+        uni.showModal({
+          title: '提示',
+          content: '请先登录',
+          showCancel: false,
+          success: () => {
+            
+          }
+        });
+        return;
+      }
       uni.navigateTo({
         url: path,
       });

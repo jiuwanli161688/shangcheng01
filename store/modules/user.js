@@ -29,9 +29,11 @@ const actions = {
   async login({ commit }, loginData) {
     try {
       const res = await login(loginData)
-      commit('SET_TOKEN', res.data.token)
+      commit('SET_TOKEN', res.data.access_token)
       // 登录成功后获取用户信息
       const userRes = await getUserInfo()
+      console.log('用户信息', userRes)
+
       commit('SET_USER_INFO', userRes.data)
       return res
     } catch (error) {

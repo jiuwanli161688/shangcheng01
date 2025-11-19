@@ -1,4 +1,11 @@
+import store from '@/store'
+
 const BASE_URL = 'https://cxjpft.zxdr.cc'
+
+function getAuthToken() {
+  console.log('开始获取token', store.token)
+  return store.token ? store.token : ''
+}
 
 class Request {
   constructor() {
@@ -31,6 +38,7 @@ class Request {
     try {
       // 请求拦截
       let requestOptions = await this.runInterceptors('request', options)
+      const token = getAuthToken()
       
       return new Promise((resolve, reject) => {
         console.log("请求收到---request", requestOptions)
@@ -39,17 +47,28 @@ class Request {
           method: requestOptions.method || 'GET',
           data: requestOptions.data || {},
           header: {
+            Authorization: 'Basic c2FiZXI6c2FiZXJfc2VjcmV0',
+            'BladeAuth': token ? `bearer ${token}` : 'bearer ',
+
             // 'Content-Type': 'application/json',
-            'Content-Type': 'application/x-www-form-urlencoded',
+            'Content-Type': requestOptions.contentType ? requestOptions.contentType : 'application/x-www-form-urlencoded',
             ...requestOptions.header
           },
           success: async (res) => {
+      console.log('响应request', res)
+
             // 响应拦截
-            const response = await this.runInterceptors('response', res)
-            if (response.statusCode === 200) {
-              resolve(response.data)
+            // const response = await this.runInterceptors('response', res)
+
+            // if (response.statusCode === 200) {
+            //   resolve(response)
+            // } else {
+            //   reject(response)
+            // }
+             if (res.statusCode === 200) {
+              resolve(res)
             } else {
-              reject(response)
+              reject(res)
             }
           },
           fail: (err) => {
@@ -112,7 +131,7 @@ request.useRequestInterceptor((config) => {
   if (token) {
     config.header = {
       ...config.header,
-      'Authorization': `Bearer ${token}`
+      'BladeAuth': `Bearer ${token}`
     }
   }
   return config
@@ -148,9 +167,9 @@ request.useResponseInterceptor((response) => {
       content: '登录已过期，请重新登录',
       showCancel: false,
       success: () => {
-        uni.navigateTo({
-          url: '/pages/auth/login'
-        })
+        // uni.navigateTo({
+        //   url: '/pages/auth/login'
+        // })
       }
     })
     return Promise.reject(response)
