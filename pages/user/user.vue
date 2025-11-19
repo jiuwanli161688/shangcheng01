@@ -18,7 +18,11 @@
           <view class="name-row">
             <text class="username">子墨</text>
             <view class="vip-badge">
-              <text class="vip-icon">👑</text>
+							<image	
+								class="vip-icon"
+								src="/static/images/user/huangguan.png"
+							  mode="aspectFill"
+							></image>
               <text class="vip-text">洋墨柜</text>
             </view>
           </view>
@@ -27,13 +31,13 @@
         <view class="user-actions">
           <view class="action-icon">
             <image
-              src="https://img2.baidu.com/it/u=2612741288,182099192&fm=253&fmt=auto&app=138&f=JPEG?w=513&h=500"
+							src="/static/images/user/xiaoxi.png"
               mode="aspectFill"
             ></image>
           </view>
-          <view class="action-icon">
+          <view class="action-icon" @click="goPage('setting')">
             <image
-              src="https://img2.baidu.com/it/u=2612741288,182099192&fm=253&fmt=auto&app=138&f=JPEG?w=513&h=500"
+							src="/static/images/user/shezhi.png"
               mode="aspectFill"
             ></image>
           </view>
@@ -45,7 +49,7 @@
     <view class="order-section">
       <view class="section-header">
         <text class="section-title">我的订单</text>
-        <view class="more-btn" @click="goToOrders">
+        <view class="more-btn" @click="goPage('order')">
           <text class="more-text">更多</text>
           <image
             class="arrow"
@@ -59,7 +63,7 @@
           class="order-tab"
           v-for="(item, index) in orderTabs"
           :key="index"
-          @click="goToOrderList(item.type)"
+          @click="goPage('order', `?type=${item.type}`)"
         >
           <view class="tab-icon-wrap">
             <!-- <text class="tab-icon">{{ item.icon }}</text> -->
@@ -75,7 +79,7 @@
     <view class="wallet-section">
       <view class="section-header">
         <text class="section-title">我的钱包</text>
-        <view class="manage-btn" @click="goToShopManage">
+        <view class="manage-btn" @click="goPage('shop')">
           <image
             class="manage-icon"
             src="/static/images/user/dianpu.png"
@@ -134,10 +138,7 @@
 
     <!-- 底部占位 -->
     <view class="bottom-placeholder"></view>
-    <!--  -->
-    <picker @change="bindPickerChange" :value="sexIndex" :range="sexRange">
-      <view class="uni-input">{{sexRange[sexIndex].label}}</view>
-    </picker>
+
   </view>
 </template>
 
@@ -157,12 +158,6 @@ export default {
   },
   data() {
     return {
-      sexIndex: 0,
-      sexRange: [
-        { value: 0, label: '未知' },
-        { value: 1, label: '男' },
-        { value: 2, label: '女' },
-      ],
       statusBarHeight: 0,
       balance: "10023.25",
       redPackets: 0,
@@ -230,10 +225,6 @@ export default {
   methods: {
     ...mapActions('user', ['login']),
     getTopHeight: getNavBarHeight,
-    bindPickerChange(inx) {
-      this.sexIndex = inx;
-      console.log('inx', inx)
-    },
     getLogin() {
       const that = this;
       uni.login({
@@ -262,21 +253,17 @@ export default {
       // 这里可以调用API获取用户数据
       // uni.request({...})
     },
-    goToOrders() {
-      uni.navigateTo({
-        url: "/pages/orders/orders",
-      });
-    },
-    goToOrderList(type) {
-      uni.navigateTo({
-        url: `/pages/orders/orders?type=${type}`,
-      });
-    },
-    goToShopManage() {
-      uni.navigateTo({
-        url: "/pages/shop/manage",
-      });
-    },
+		goPage(name, params) {
+			const path = {
+				'setting': '/pages/user/setting',
+				'order': '/pages/',
+				'shop': '/pages/'
+			}
+		  uni.navigateTo({
+		    url: path[name] + (params || ''),
+		  });
+		},
+		// banner广告
     goToMerchantRegister() {
       uni.navigateTo({
         url: "/pages/merchant/register",
@@ -392,6 +379,8 @@ export default {
 }
 
 .vip-icon {
+	width: 32rpx;
+	height: 32rpx;
   font-size: 24rpx;
 }
 
@@ -483,22 +472,23 @@ export default {
 
 .tab-icon {
   font-size: 48rpx;
-  width: 80rpx;
-  height: 60rpx;
+  width: 66rpx;
+  height: 58rpx;
 }
 
 .badge {
   position: absolute;
-  top: -4rpx;
-  right: -4rpx;
-  border: 2rpx solid #f60808;
+  top: -10rpx;
+  right: -10rpx;
+	min-width: 26rpx;
+	min-height: 26rpx;
+  border: 1px solid #f60808;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 20rpx;
+  font-size: 24rpx;
   color: #f60808;
-  padding: 0 6rpx;
 }
 
 .tab-label {

@@ -1,7 +1,12 @@
 <template>
   <view class="modal-overlay" v-if="visible" @click="handleOverlayClick">
     <view class="modal-content" @click.stop>
-      
+      <input
+        class="form-input"
+        type="text"
+        v-model="userName"
+      />
+			<view class="tips">小字小字小字</view>
       <!-- 保存按钮 -->
       <view class="save-btn" @click="handleSave">保存</view>
     </view>
@@ -10,92 +15,40 @@
 
 <script>
 export default {
-  name: 'CommonModal',
+  name: 'CommonModalName',
   props: {
     visible: {
       type: Boolean,
       default: false
     },
-    phone: {
+    name: {
       type: String,
       default: ''
     }
   },
   data() {
     return {
-      verifyCode: '',
-      countdown: 0,
-      timer: null
+      userName: '',
     }
   },
   watch: {
     visible(newVal) {
       if (!newVal) {
-        // 弹窗关闭时清理倒计时
-        this.clearTimer()
-        this.verifyCode = ''
+        this.userName = ''
       }
     }
   },
-  beforeDestroy() {
-    this.clearTimer()
-  },
   methods: {
-    // 获取验证码
-    async handleGetVerifyCode() {
-      if (this.countdown > 0) return
-      
-      if (!this.phone) {
-        this.$showToast('手机号不能为空')
-        return
-      }
-
-      try {
-        this.$showLoading('发送中...')
-        
-        // 调用发送验证码接口
-        await this.$http.post('/auth/send-verify-code', {
-          phone: this.phone,
-          type: 'changePhone'
-        })
-
-        this.$showToast('验证码已发送', 'success')
-        
-        // 开始60秒倒计时
-        this.countdown = 60
-        this.timer = setInterval(() => {
-          this.countdown--
-          if (this.countdown <= 0) {
-            this.clearTimer()
-          }
-        }, 1000)
-
-      } catch (error) {
-        console.error('发送验证码失败:', error)
-      } finally {
-        this.$hideLoading()
-      }
-    },
-    
-    // 清理定时器
-    clearTimer() {
-      if (this.timer) {
-        clearInterval(this.timer)
-        this.timer = null
-      }
-      this.countdown = 0
-    },
-    
     // 保存
     handleSave() {
-      if (!this.verifyCode) {
-        this.$showToast('请输入验证码')
+      if (!this.userName) {
+        this.$showToast('请输入昵称')
         return
       }
       
       this.$emit('save', {
-        phone: this.phone,
-        verifyCode: this.verifyCode
+        userName: this.userName,
+				key: 'userName'
       })
     },
     
@@ -197,5 +150,16 @@ export default {
   font-size: 32rpx;
   color: #ffffff;
   margin: 48rpx auto 0;
+}
+
+.form-input {
+	text-align: center;
+}
+
+.tips {
+	font-size: 24rpx;
+	margin: 10rpx auto 0;
+	text-align: center;
+	color: #aaa;
 }
 </style>

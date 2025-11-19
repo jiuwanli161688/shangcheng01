@@ -46,14 +46,14 @@
       </view>
       <view class="notice">
          <Notice 
-        ref="importantNotice"
-        text="请关注本店发布的公告通知1"
-        :duration="8"
-        background-color="#fee2e2"
-        text-color="#dc2626"
-        height="90rpx"
-        @click="onNoticeClick"
-      />
+					ref="importantNotice"
+					text="请关注本店发布的公告通知1"
+					:duration="8"
+					background-color="#fee2e2"
+					text-color="#dc2626"
+					height="90rpx"
+					@click="onNoticeClick"
+				/>
       </view>
 
       <!-- 新品推荐 -->

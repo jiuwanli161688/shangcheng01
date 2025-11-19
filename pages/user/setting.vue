@@ -19,11 +19,12 @@
         <view class="menu-left">
           <text class="menu-text">昵称</text>
         </view>
-        <view class="menu-text flex-1 menu-label">小明明</view>
+        <view class="menu-text flex-1 menu-label" @click="showModalName=true">小明明</view>
         <image
           class="arrow"
           src="/static/images/user/right.png"
           mode="aspectFill"
+				 @click="showModalName=true"
         ></image>
       </view>
       <view class="menu-item">
@@ -55,12 +56,22 @@
         <view class="menu-left">
           <text class="menu-text">性别</text>
         </view>
-        <view class="menu-text flex-1 menu-label">111111</view>
-        <image
-          class="arrow"
-          src="/static/images/user/right.png"
-          mode="aspectFill"
-        ></image>
+				<picker class="flex-1" @change="bindPickerChange" :value="sexIndex" :range="sexRange">
+					 <!-- <view class="uni-input"></view> -->
+					<view class="menu-text flex-1 menu-label" style="text-align: right;">
+						<text>{{sexRange[sexIndex]}}</text>
+						<!-- <image
+							class="arrow"
+							src="/static/images/user/right.png"
+							mode="aspectFill"
+						></image> -->
+					</view>
+					<image
+						class="arrow"
+						src="/static/images/user/right.png"
+						mode="aspectFill"
+					></image>
+			 </picker>
       </view>
     </view>
     <view class="logout" @click="logout">退出登录</view>
@@ -71,6 +82,17 @@
       @close="showModal = false"
       @save="handleSave"
     />
+		<!-- 修改名称 -->
+		<modal-name
+			:visible="showModalName"
+			:name="info.userName"
+			@close="showModalName = false"
+			@save="handleSave"
+		/>
+		<!--  -->
+	<!-- 	<picker @change="bindPickerChange" :value="sexIndex" :range="sexRange">
+		   <view class="uni-input">{{sexRange[sexIndex].label}}</view>
+		 </picker> -->
   </view>
 </template>
 
@@ -78,15 +100,20 @@
 import CustomNavbar from "@/components/custom-navbar/custom-navbar";
 import { getNavBarHeight } from "@/utils/utils";
 import ModalPhone from "./components/modal-phone.vue";
+import ModalName from "./components/modal-name.vue";
 
 export default {
   components: {
     CustomNavbar,
     ModalPhone,
+		ModalName,
   },
   data() {
     return {
+      sexIndex: 0,
+      sexRange: ['未知', '男', '女' ],
       statusBarHeight: 0,
+			showModalName: false,
       showModal: false,
       info: {
         userPhone: "18812345678",
@@ -100,8 +127,11 @@ export default {
   },
   methods: {
     getTopHeight: getNavBarHeight,
-    handleSave() {
-      console.log("保存手机号");
+		bindPickerChange(e) {
+		  this.sexIndex = e.detail.value
+		},
+    handleSave(record) {
+      console.log(" 保存信息", record);
     },
   },
 };

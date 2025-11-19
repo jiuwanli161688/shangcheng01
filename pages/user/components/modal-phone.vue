@@ -124,7 +124,8 @@ export default {
       
       this.$emit('save', {
         phone: this.phone,
-        verifyCode: this.verifyCode
+        verifyCode: this.verifyCode,
+				key: 'userPhone'
       })
     },
     
