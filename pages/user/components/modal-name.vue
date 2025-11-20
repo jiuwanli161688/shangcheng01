@@ -1,13 +1,13 @@
 <template>
   <view class="modal-overlay" v-if="visible" @click="handleOverlayClick">
     <view class="modal-content" @click.stop>
+      <view class="modal-title">昵称修改</view>
       <input
         class="form-input"
         type="text"
         v-model="userName"
       />
-			<view class="tips">小字小字小字</view>
-      <!-- 保存按钮 -->
+			<view class="tips">请点击上方昵称进行修改</view>
       <view class="save-btn" @click="handleSave">保存</view>
     </view>
   </view>

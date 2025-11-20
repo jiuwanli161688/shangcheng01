@@ -20,7 +20,7 @@ export default {
     checkLoginStatus() {
       const token = uni.getStorageSync('token')
       if (token) {
-        this.$store.dispatch('user/getUserInfo')
+        // this.$store.dispatch('user/getUserInfo')
       }
     },
     

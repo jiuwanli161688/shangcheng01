@@ -11,33 +11,40 @@
       <view class="user-info">
         <image
           class="avatar"
-          src="https://img2.baidu.com/it/u=2612741288,182099192&fm=253&fmt=auto&app=138&f=JPEG?w=513&h=500"
+          :src="userInfo.avatar || '/static/images/user/head.png'"
           mode="aspectFill"
         ></image>
+
         <view class="user-details">
-          <view class="name-row">
-            <text class="username">子墨</text>
-            <view class="vip-badge">
-							<image	
-								class="vip-icon"
-								src="/static/images/user/huangguan.png"
-							  mode="aspectFill"
-							></image>
-              <text class="vip-text">洋墨柜</text>
+          <template v-if="userInfo">
+            <view class="name-row">
+              <text class="username">{{ userInfo.yhnc }}</text>
+              <view class="vip-badge">
+                <image
+                  class="vip-icon"
+                  src="/static/images/user/huangguan.png"
+                  mode="aspectFill"
+                ></image>
+                <text class="vip-text">洋墨柜</text>
+              </view>
             </view>
-          </view>
-          <text class="user-id">用户ID：CXJZ0Z50001</text>
+            <text class="user-id">用户ID：{{ userInfo.userId }}</text>
+          </template>
+          <template v-else>
+            <div class="login-btn">登录/注册</div>
+          </template>
         </view>
-        <view class="user-actions">
+
+        <view v-if="userInfo" class="user-actions">
           <view class="action-icon">
             <image
-							src="/static/images/user/xiaoxi.png"
+              src="/static/images/user/xiaoxi.png"
               mode="aspectFill"
             ></image>
           </view>
           <view class="action-icon" @click="goPage('setting')">
             <image
-							src="/static/images/user/shezhi.png"
+              src="/static/images/user/shezhi.png"
               mode="aspectFill"
             ></image>
           </view>
@@ -66,7 +73,6 @@
           @click="goPage('order', `?type=${item.type}`)"
         >
           <view class="tab-icon-wrap">
-            <!-- <text class="tab-icon">{{ item.icon }}</text> -->
             <image class="tab-icon" :src="item.icon"></image>
             <view v-if="item.badge" class="badge">{{ item.badge }}</view>
           </view>
@@ -95,22 +101,22 @@
       </view>
       <view class="wallet-items">
         <view class="wallet-item">
-          <text class="wallet-amount">{{ balance }}</text>
+          <text class="wallet-amount">{{ wallet.zhye }}</text>
           <text class="wallet-label">余额(元)</text>
         </view>
         <view class="wallet-item">
-          <text class="wallet-amount">{{ redPackets }}</text>
+          <text class="wallet-amount">{{ wallet.hongbaoNum }}</text>
           <text class="wallet-label">可用红包(个)</text>
         </view>
         <view class="wallet-item">
-          <text class="wallet-amount">{{ coupons }}</text>
+          <text class="wallet-amount">{{ wallet.kaquanNum }}</text>
           <text class="wallet-label">可用卡券(张)</text>
         </view>
       </view>
     </view>
 
-    <!-- 商家入驻横幅 -->
-    <view class="banner-section" @click="goToMerchantRegister">
+    <!-- 商家入驻横幅-暂时没有-注释 -->
+    <view v-if="false" class="banner-section" @click="goToMerchantRegister">
       <custom-swiper
         :info="swiperInfo"
         @img-click="bannerClick"
@@ -138,7 +144,6 @@
 
     <!-- 底部占位 -->
     <view class="bottom-placeholder"></view>
-
   </view>
 </template>
 
@@ -151,6 +156,7 @@ import dfk from "@/static/images/user/dfk.png";
 import dfh from "@/static/images/user/dfh.png";
 import dsh from "@/static/images/user/dsh.png";
 import ywc from "@/static/images/user/ywc.png";
+import { orderCount, getWalltApi } from "@/api/modules/order";
 
 export default {
   components: {
@@ -159,9 +165,6 @@ export default {
   data() {
     return {
       statusBarHeight: 0,
-      balance: "10023.25",
-      redPackets: 0,
-      coupons: 0,
       orderTabs: [
         { icon: dfk, label: "待付款", type: "unpaid", badge: 0 },
         { icon: dfh, label: "待发货", type: "unshipped", badge: 1 },
@@ -170,25 +173,25 @@ export default {
       ],
       menuList: [
         {
-          icon: '/static/images/user/shdz.png',
+          icon: "/static/images/user/shdz.png",
           label: "收货地址",
           path: "/pages/address/address",
           color: "#F60808",
         },
         {
-          icon: '/static/images/user/spsc.png',
+          icon: "/static/images/user/spsc.png",
           label: "商品收藏",
           path: "/pages/favorites/favorites",
           color: "#4A90E2",
         },
         {
-          icon: '/static/images/user/zfmm.png',
+          icon: "/static/images/user/zfmm.png",
           label: "支付密码",
           path: "/pages/password/password",
           color: "#F60808",
         },
         {
-          icon: '/static/images/user/bzzx.png',
+          icon: "/static/images/user/bzzx.png",
           label: "帮助中心",
           path: "/pages/help/help",
           color: "#4A90E2",
@@ -211,6 +214,15 @@ export default {
           content: "内容 C",
         },
       ],
+      wallet: {
+        hongbaoNum: '-',
+        kaquanNum: '-',
+        ljtx: '-',
+        remark: "-",
+        userId: '-',
+        zhye: '-',
+        zsye: '-',
+      },
     };
   },
   onLoad() {
@@ -222,29 +234,47 @@ export default {
     this.loadUserData();
     this.getLogin();
   },
+  computed: {
+    ...mapState("user", ["userInfo"]),
+  },
   methods: {
-    ...mapActions('user', ['login']),
+    ...mapActions("user", ["login"]),
     getTopHeight: getNavBarHeight,
     getLogin() {
       const that = this;
       uni.login({
         provider: "weixin", //使用微信登录
         success: async function (loginRes) {
-          console.log('微信',loginRes);
+          console.log("微信", loginRes);
           const res = await that.login({
-            grant_type: 'weChat',
-            tenantId: '000000',
+            grant_type: "weChat",
+            tenantId: "000000",
             code: loginRes.code,
             logonType: 1,
-          })
-          console.log('令牌结果',res);
-
+          });
+          that.getOrderCount();
+          that.getWallt();
+          console.log("令牌结果", res);
         },
         fail: (err) => {
-          console.log('失败',err);
-
-        }
+          console.log("失败", err);
+        },
       });
+    },
+    async getOrderCount() {
+      const res = await orderCount({ sjid: this.userInfo.sjId });
+      const { dfkCount, dfhCount, dshCount, ywcCount } = res.data;
+      const count = [dfkCount, dfhCount, dshCount, ywcCount];
+      this.orderTabs = this.orderCount.map((item, inx) => {
+        return {
+          ...item,
+          badge: count[inx],
+        };
+      });
+    },
+    async getWallt() {
+      const res = await getWalltApi({ sjid: this.userInfo.sjId });
+      this.wallet = res || {}
     },
     bannerClick(item) {
       console.log("广告点击", item);
@@ -253,17 +283,17 @@ export default {
       // 这里可以调用API获取用户数据
       // uni.request({...})
     },
-		goPage(name, params) {
-			const path = {
-				'setting': '/pages/user/setting',
-				'order': '/pages/',
-				'shop': '/pages/'
-			}
-		  uni.navigateTo({
-		    url: path[name] + (params || ''),
-		  });
-		},
-		// banner广告
+    goPage(name, params) {
+      const path = {
+        setting: "/pages/user/setting",
+        order: "/pages/",
+        shop: "/pages/",
+      };
+      uni.navigateTo({
+        url: path[name] + (params || ""),
+      });
+    },
+    // banner广告
     goToMerchantRegister() {
       uni.navigateTo({
         url: "/pages/merchant/register",
@@ -271,15 +301,13 @@ export default {
     },
     goToPage(path) {
       // 检查登录状态
-      const token = uni.getStorageSync('token');
+      const token = uni.getStorageSync("token");
       if (!token) {
         uni.showModal({
-          title: '提示',
-          content: '请先登录',
+          title: "提示",
+          content: "请先登录",
           showCancel: false,
-          success: () => {
-            
-          }
+          success: () => {},
         });
         return;
       }
@@ -348,7 +376,7 @@ export default {
   width: 108rpx;
   height: 108rpx;
   border-radius: 50%;
-  border: 4rpx solid #ffffff;
+  /* border: 4rpx solid #ffffff; */
 }
 
 .user-details {
@@ -379,8 +407,8 @@ export default {
 }
 
 .vip-icon {
-	width: 32rpx;
-	height: 32rpx;
+  width: 32rpx;
+  height: 32rpx;
   font-size: 24rpx;
 }
 
@@ -445,8 +473,8 @@ export default {
 }
 
 .arrow {
-  width: 28rpx;
-  height: 28rpx;
+  width: 16rpx;
+  height: 32rpx;
 }
 
 .order-tabs {
@@ -480,8 +508,8 @@ export default {
   position: absolute;
   top: -10rpx;
   right: -10rpx;
-	min-width: 26rpx;
-	min-height: 26rpx;
+  min-width: 26rpx;
+  min-height: 26rpx;
   border: 1px solid #f60808;
   border-radius: 50%;
   display: flex;
@@ -590,5 +618,9 @@ export default {
 
 .bottom-placeholder {
   height: 40rpx;
+}
+.login-btn {
+  font-size: 36rpx;
+  color: #fff;
 }
 </style>

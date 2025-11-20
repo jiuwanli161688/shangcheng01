@@ -1,4 +1,5 @@
 import { http } from '@/utils/request'
+// import { request as http } from '@/utils/util2'
 
 // 用户登录
 export function login(data) {
@@ -17,76 +18,18 @@ export function login(data) {
 }
  */
 export function updateUserInfo(data) {
-  return http.post('/yhb/updateYhInfo', data)
+  return http.post('/yonghu/yhb/updateYhInfo', data)
 }
 // 获取用户信息
 export function getUserInfo() {
-  return http.get('/yhb/getYhInfo')
-  // return http.get('/yhscb/addSc')
+  return http.get('/yonghu/yhb/getYhInfo')
 }
-/*
-{
-	"avatar": "",
-	"birthday": "",
-	"email": "",
-	"qm": "",
-	"rzbz": 0,
-	"rzsj": "",
-	"sex": 0,
-	"sjId": 0,
-	"sjhm": "",
-	"status": 0,
-	"sysRoleId": 0,
-	"tenantId": "",
-	"userId": 0,
-	"userSjList": [
-		{
-			"kfdh": "",
-			"lastAccessTime": "",
-			"sjLogo": "",
-			"sjid": 0,
-			"sjjc": "",
-			"sjjj": "",
-			"sjmc": "",
-			"xxdz": ""
-		}
-	],
-	"yhnc": "",
-	"yhsm": "",
-	"yhzh": "",
-	"zhYeb": {
-		"hongbaoNum": 0,
-		"kaquanNum": 0,
-		"ljtx": 0,
-		"remark": "",
-		"userId": 0,
-		"zhye": 0,
-		"zsye": 0
-	}
-}
-*/
-
-// 用户注册
-export function register(data) {
-  return http.post('/user/register', data)
-}
-
 // 退出登录
 export function logout() {
-  return http.post('/user/logout')
+  return http.post('/blade-auth/oauth/logout')
+}
+// 获取钱包余额
+export function getWalltApi() {
+  return http.get('/yonghu/yhzhYeb/getInfo')
 }
 
-// 获取订单统计
-export function getOrderStats() {
-  return http.get('/user/order/stats')
-}
-
-// 修改密码
-export function changePassword(data) {
-  return http.post('/user/password', data)
-}
-
-// 获取优惠券列表
-export function getCouponList(params) {
-  return http.get('/user/coupon/list', params)
-}

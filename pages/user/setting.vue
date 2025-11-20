@@ -57,24 +57,18 @@
           <text class="menu-text">性别</text>
         </view>
 				<picker class="flex-1" @change="bindPickerChange" :value="sexIndex" :range="sexRange">
-					 <!-- <view class="uni-input"></view> -->
 					<view class="menu-text flex-1 menu-label" style="text-align: right;">
 						<text>{{sexRange[sexIndex]}}</text>
-						<!-- <image
+						<image
 							class="arrow"
 							src="/static/images/user/right.png"
 							mode="aspectFill"
-						></image> -->
+						></image>
 					</view>
-					<image
-						class="arrow"
-						src="/static/images/user/right.png"
-						mode="aspectFill"
-					></image>
 			 </picker>
       </view>
     </view>
-    <view class="logout" @click="logout">退出登录</view>
+    <view class="logout" @click="logoutHandle">退出登录</view>
     <!-- 修改手机 -->
     <modal-phone
       :visible="showModal"
@@ -89,14 +83,11 @@
 			@close="showModalName = false"
 			@save="handleSave"
 		/>
-		<!--  -->
-	<!-- 	<picker @change="bindPickerChange" :value="sexIndex" :range="sexRange">
-		   <view class="uni-input">{{sexRange[sexIndex].label}}</view>
-		 </picker> -->
   </view>
 </template>
 
 <script>
+import { mapState, mapGetters, mapActions } from "vuex";
 import CustomNavbar from "@/components/custom-navbar/custom-navbar";
 import { getNavBarHeight } from "@/utils/utils";
 import ModalPhone from "./components/modal-phone.vue";
@@ -125,13 +116,27 @@ export default {
     const systemInfo = uni.getSystemInfoSync();
     this.statusBarHeight = systemInfo.statusBarHeight;
   },
+  computed: {
+    ...mapState("user", ["userInfo"]),
+  },
   methods: {
+    ...mapActions("user", ["logout", "updateUserInfo", "getUserInfo"]),
     getTopHeight: getNavBarHeight,
 		bindPickerChange(e) {
 		  this.sexIndex = e.detail.value
 		},
-    handleSave(record) {
+    async handleSave(record) {
+      await this.updateUserInfo()
+      uni.showToast({
+        title: '修改成功！',
+        icon: 'success',
+        mask: true
+      })
       console.log(" 保存信息", record);
+    },
+    async logoutHandle() {
+      console.log("退出登录");
+      await this.logout();
     },
   },
 };

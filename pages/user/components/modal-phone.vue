@@ -1,16 +1,13 @@
 <template>
   <view class="modal-overlay" v-if="visible" @click="handleOverlayClick">
     <view class="modal-content" @click.stop>
-      <!-- 标题 -->
       <view class="modal-title">手机号码修改</view>
       
-      <!-- 手机号 -->
       <view class="form-item">
         <text class="form-label">手机号</text>
         <text class="form-value">{{ phone }}</text>
       </view>
       
-      <!-- 验证码 -->
       <view class="form-item">
         <text class="form-label">验证码</text>
         <view class="form-input-wrapper">
@@ -31,7 +28,6 @@
         </view>
       </view>
       
-      <!-- 保存按钮 -->
       <view class="save-btn" @click="handleSave">保存</view>
     </view>
   </view>
