@@ -13,6 +13,7 @@
           class="avatar"
           :src="userInfo.avatar || '/static/images/user/head.png'"
           mode="aspectFill"
+          @click="getLogin"
         ></image>
 
         <view class="user-details">
@@ -31,7 +32,7 @@
             <text class="user-id">用户ID：{{ userInfo.userId }}</text>
           </template>
           <template v-else>
-            <div class="login-btn">登录/注册</div>
+            <div class="login-btn" @click="getLogin">登录/注册</div>
           </template>
         </view>
 
@@ -232,7 +233,14 @@ export default {
 
     // 加载用户数据
     this.loadUserData();
-    this.getLogin();
+    // this.getLogin();
+  },
+  onShow() {
+    // 获取用户信息
+    if (this.userInfo && this.userInfo.userId) {
+      this.getOrderCount();
+      this.getWallt();
+    }
   },
   computed: {
     ...mapState("user", ["userInfo"]),
@@ -242,6 +250,7 @@ export default {
     getTopHeight: getNavBarHeight,
     getLogin() {
       const that = this;
+      if (this.userInfo.userId) return;
       uni.login({
         provider: "weixin", //使用微信登录
         success: async function (loginRes) {

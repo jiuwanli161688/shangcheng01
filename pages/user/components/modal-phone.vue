@@ -34,6 +34,9 @@
 </template>
 
 <script>
+import crypto from '../../../utils/crypto';
+import { sendSmsApi } from '../../../api/user';
+
 export default {
   name: 'CommonModal',
   props: {
@@ -79,10 +82,18 @@ export default {
         this.$showLoading('发送中...')
         
         // 调用发送验证码接口
-        await this.$http.post('/auth/send-verify-code', {
-          phone: this.phone,
-          type: 'changePhone'
+        // await this.$http.post('/auth/send-verify-code', {
+        //   phone: this.phone,
+        //   type: 'changePhone'
+        // })
+        // 测试  --   待验证接口是否正确
+        const res = await sendSmsApi({
+          sjhm: this.phone,
+          ywlx: 'changePhone',
+          // 对手机号进行加密传输
+          sjhmJm: crypto.encrypt(this.phone)
         })
+        console.log('sendSmsApi res:', res)
 
         this.$showToast('验证码已发送', 'success')
         
@@ -119,9 +130,9 @@ export default {
       }
       
       this.$emit('save', {
-        phone: this.phone,
-        verifyCode: this.verifyCode,
-				key: 'userPhone'
+        sjhm: this.phone,
+        smsCode: this.verifyCode,
+				key: 'sjhm'
       })
     },
     

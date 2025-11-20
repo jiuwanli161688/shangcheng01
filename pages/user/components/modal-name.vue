@@ -47,8 +47,8 @@ export default {
       }
       
       this.$emit('save', {
-        userName: this.userName,
-				key: 'userName'
+        yhnc: this.userName,
+				key: 'yhnc'
       })
     },
     

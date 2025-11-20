@@ -10,16 +10,16 @@
         </view>
         <image
           class="avatar"
-          src="@/static/images/user/user.png"
+          :src=" userInfo.avatar|| '@/static/images/user/head.png'"
           mode="aspectFill"
-          @click="goToPage(item.path)"
+          @click="updateImg"
         ></image>
       </view>
       <view class="menu-item">
         <view class="menu-left">
           <text class="menu-text">昵称</text>
         </view>
-        <view class="menu-text flex-1 menu-label" @click="showModalName=true">小明明</view>
+        <view class="menu-text flex-1 menu-label" @click="showModalName=true">{{ userInfo.yhnc }}</view>
         <image
           class="arrow"
           src="/static/images/user/right.png"
@@ -32,7 +32,7 @@
           <text class="menu-text">手机号码</text>
         </view>
         <view class="flex-cc" @click="showModal=true">
-          <view class="menu-text flex-1 menu-label">166666666</view>
+          <view class="menu-text flex-1 menu-label">{{ userInfo.sjhm }}</view>
           <image
             class="arrow"
             src="/static/images/user/right.png"
@@ -44,7 +44,7 @@
         <view class="menu-left">
           <text class="menu-text">会员ID</text>
         </view>
-        <view class="menu-text flex-1 menu-label">111111</view>
+        <view class="menu-text flex-1 menu-label">{{ user.aaaaaa }}</view>
         <image
           class="arrow"
           src="/static/images/user/right.png"
@@ -56,6 +56,8 @@
         <view class="menu-left">
           <text class="menu-text">性别</text>
         </view>
+				<!-- <picker class="flex-1" @change="bindPickerChange" :value="sexIndex" :range="sexRange"> -->
+				<!-- <picker class="flex-1" @change="bindPickerChange" :value="userInfo.sex" :range="sexRange"> -->
 				<picker class="flex-1" @change="bindPickerChange" :value="sexIndex" :range="sexRange">
 					<view class="menu-text flex-1 menu-label" style="text-align: right;">
 						<text>{{sexRange[sexIndex]}}</text>
@@ -92,6 +94,7 @@ import CustomNavbar from "@/components/custom-navbar/custom-navbar";
 import { getNavBarHeight } from "@/utils/utils";
 import ModalPhone from "./components/modal-phone.vue";
 import ModalName from "./components/modal-name.vue";
+import user from "../../store/modules/user";
 
 export default {
   components: {
@@ -123,16 +126,51 @@ export default {
     ...mapActions("user", ["logout", "updateUserInfo", "getUserInfo"]),
     getTopHeight: getNavBarHeight,
 		bindPickerChange(e) {
-		  this.sexIndex = e.detail.value
+      const val = e.detail.value
+		  this.sexIndex = val;
+      handleSave({ sex: val })
 		},
     async handleSave(record) {
-      await this.updateUserInfo()
+      await this.updateUserInfo({ ...this.userInfo, ...record })
       uni.showToast({
         title: '修改成功！',
         icon: 'success',
         mask: true
       })
       console.log(" 保存信息", record);
+    },
+    updateImg() {
+      uni.chooseImage({
+        count: 1,
+        sizeType: ['original', 'compressed'],
+        sourceType: ['album', 'camera'],
+        success: async (res) => {
+          const tempFilePaths = res.tempFilePaths;
+          console.log("选择的图片", tempFilePaths);
+          const filePath = tempFilePaths[0];
+
+          const uploadRes = await this.$http.uploadFile({
+            // 测试
+            url: '/upload/avatar/aaaaaaa',
+            filePath: filePath,
+            name: 'avatar',
+          });
+
+          const data = JSON.parse(uploadRes.data);
+          if (data.code === 200) {
+            // 假设返回的图片URL在data.url中
+            // 测试
+            const avatarUrl = data.data.url; 
+            
+            await this.handleSave({ avatar: avatarUrl });
+          } else {
+            uni.showToast({
+              title: '上传失败',
+              icon: 'none'
+            });
+          }
+        }
+      });
     },
     async logoutHandle() {
       console.log("退出登录");
