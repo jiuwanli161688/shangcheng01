@@ -35,8 +35,10 @@ export default {
     visible(newVal) {
       if (!newVal) {
         this.userName = ''
+      } else {
+        this.userName = this.name || '';
       }
-    }
+    },
   },
   methods: {
     // 保存

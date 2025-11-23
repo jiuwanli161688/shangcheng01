@@ -11,15 +11,15 @@
       <view class="user-info">
         <image
           class="avatar"
-          :src="userInfo.avatar || '/static/images/user/head.png'"
+          :src="userInfo.data.avatar || '/static/images/user/head.png'"
           mode="aspectFill"
           @click="getLogin"
         ></image>
 
         <view class="user-details">
-          <template v-if="userInfo">
+          <template v-if="isLogin">
             <view class="name-row">
-              <text class="username">{{ userInfo.yhnc }}</text>
+              <text class="username">{{ userInfo.data.yhnc }}</text>
               <view class="vip-badge">
                 <image
                   class="vip-icon"
@@ -29,14 +29,14 @@
                 <text class="vip-text">洋墨柜</text>
               </view>
             </view>
-            <text class="user-id">用户ID：{{ userInfo.userId }}</text>
+            <text class="user-id">用户ID：{{ userInfo.data.userId }}</text>
           </template>
           <template v-else>
             <div class="login-btn" @click="getLogin">登录/注册</div>
           </template>
         </view>
 
-        <view v-if="userInfo" class="user-actions">
+        <view v-if="isLogin" class="user-actions">
           <view class="action-icon">
             <image
               src="/static/images/user/xiaoxi.png"
@@ -75,7 +75,7 @@
         >
           <view class="tab-icon-wrap">
             <image class="tab-icon" :src="item.icon"></image>
-            <view v-if="item.badge" class="badge">{{ item.badge }}</view>
+            <view v-if="isLogin && item.badge" class="badge">{{ item.badge }}</view>
           </view>
           <text class="tab-label">{{ item.label }}</text>
         </view>
@@ -157,7 +157,8 @@ import dfk from "@/static/images/user/dfk.png";
 import dfh from "@/static/images/user/dfh.png";
 import dsh from "@/static/images/user/dsh.png";
 import ywc from "@/static/images/user/ywc.png";
-import { orderCount, getWalltApi } from "@/api/modules/order";
+import { orderCount } from "@/api/modules/order";
+import { getWalltApi } from "@/api/modules/user";
 
 export default {
   components: {
@@ -168,7 +169,7 @@ export default {
       statusBarHeight: 0,
       orderTabs: [
         { icon: dfk, label: "待付款", type: "unpaid", badge: 0 },
-        { icon: dfh, label: "待发货", type: "unshipped", badge: 1 },
+        { icon: dfh, label: "待发货", type: "unshipped", badge: 0 },
         { icon: dsh, label: "待收货", type: "shipped", badge: 0 },
         { icon: ywc, label: "已完成", type: "completed", badge: 0 },
       ],
@@ -224,6 +225,7 @@ export default {
         zhye: '-',
         zsye: '-',
       },
+      isLogin: false,
     };
   },
   onLoad() {
@@ -236,17 +238,27 @@ export default {
     // this.getLogin();
   },
   onShow() {
+    const token = uni.getStorageSync("token");
+    this.isLogin = token ? true : false;
     // 获取用户信息
-    if (this.userInfo && this.userInfo.userId) {
-      this.getOrderCount();
-      this.getWallt();
+    if (token) {
+      this.getUserInfo();
+    }
+  },
+  watch: {
+    userInfo(newVal) {
+      console.log('用户', newVal)
+      if (newVal) {
+        this.getOrderCount();
+        this.getWallt();
+      }
     }
   },
   computed: {
     ...mapState("user", ["userInfo"]),
   },
   methods: {
-    ...mapActions("user", ["login"]),
+    ...mapActions("user", ["login", "getUserInfo"]),
     getTopHeight: getNavBarHeight,
     getLogin() {
       const that = this;
@@ -254,16 +266,18 @@ export default {
       uni.login({
         provider: "weixin", //使用微信登录
         success: async function (loginRes) {
-          console.log("微信", loginRes);
           const res = await that.login({
             grant_type: "weChat",
             tenantId: "000000",
             code: loginRes.code,
             logonType: 1,
           });
+          uni.hideLoading();
+          that.isLogin = true
+
           that.getOrderCount();
           that.getWallt();
-          console.log("令牌结果", res);
+          console.log("令牌结果", res, that.userInfo.userId);
         },
         fail: (err) => {
           console.log("失败", err);
@@ -271,10 +285,12 @@ export default {
       });
     },
     async getOrderCount() {
-      const res = await orderCount({ sjid: this.userInfo.sjId });
+      const res = await orderCount({ sjid: this.userInfo.data.sjId });
       const { dfkCount, dfhCount, dshCount, ywcCount } = res.data;
       const count = [dfkCount, dfhCount, dshCount, ywcCount];
-      this.orderTabs = this.orderCount.map((item, inx) => {
+      console.log('getOrderCount用户信息', this.userInfo)
+
+      this.orderTabs = this.orderTabs.map((item, inx) => {
         return {
           ...item,
           badge: count[inx],
@@ -282,15 +298,15 @@ export default {
       });
     },
     async getWallt() {
-      const res = await getWalltApi({ sjid: this.userInfo.sjId });
-      this.wallet = res || {}
+      const res = await getWalltApi({ sjid: this.userInfo.data.sjId });
+      this.wallet = res.data.data || {}
+      console.log("钱包", this.wallet);
+
     },
     bannerClick(item) {
       console.log("广告点击", item);
     },
     loadUserData() {
-      // 这里可以调用API获取用户数据
-      // uni.request({...})
     },
     goPage(name, params) {
       const path = {
@@ -311,6 +327,7 @@ export default {
     goToPage(path) {
       // 检查登录状态
       const token = uni.getStorageSync("token");
+      this.isLogin = token ? true : false;
       if (!token) {
         uni.showModal({
           title: "提示",

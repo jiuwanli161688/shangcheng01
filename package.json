@@ -10,8 +10,9 @@
     "build:h5": "cross-env NODE_ENV=production UNI_PLATFORM=h5 vue-cli-service uni-build"
   },
   "dependencies": {
-    "@dcloudio/uni-app": "^2.0.0",
+    "@dcloudio/uni-app": "2.0.2-4080420251103001",
     "@dcloudio/uni-mp-weixin": "^2.0.0",
+    "crypto-js": "^4.2.0",
     "vue": "^2.6.11",
     "vuex": "^3.4.0"
   },

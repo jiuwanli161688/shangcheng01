@@ -1,5 +1,4 @@
 import { http } from '@/utils/request'
-// import { request as http } from '@/utils/util2'
 
 // 用户登录
 export function login(data) {
@@ -18,7 +17,7 @@ export function login(data) {
 }
  */
 export function updateUserInfo(data) {
-  return http.post('/yonghu/yhb/updateYhInfo', data)
+  return http.post('/yonghu/yhb/updateYhInfo', data, { contentType: 'application/json' })
 }
 // 获取用户信息
 export function getUserInfo() {
@@ -26,7 +25,7 @@ export function getUserInfo() {
 }
 // 退出登录
 export function logout() {
-  return http.post('/blade-auth/oauth/logout')
+  return http.get('/blade-auth/oauth/logout')
 }
 // 获取钱包余额
 export function getWalltApi() {

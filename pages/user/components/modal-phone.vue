@@ -5,7 +5,15 @@
       
       <view class="form-item">
         <text class="form-label">手机号</text>
-        <text class="form-value">{{ phone }}</text>
+        <!-- <text class="form-value">{{ phone }}</text> -->
+        <input
+          class="form-value"
+          type="number"
+          placeholder="请输入手机号码"
+          v-model="userPhone"
+          minlength="11"
+          maxlength="11"
+        />
       </view>
       
       <view class="form-item">
@@ -35,7 +43,9 @@
 
 <script>
 import crypto from '../../../utils/crypto';
-import { sendSmsApi } from '../../../api/user';
+import {encrypt} from '../../../utils/crypto';
+
+import { sendSmsApi } from '../../../api/modules/common';
 
 export default {
   name: 'CommonModal',
@@ -53,48 +63,46 @@ export default {
     return {
       verifyCode: '',
       countdown: 0,
+      userPhone: '',
       timer: null
     }
   },
   watch: {
     visible(newVal) {
       if (!newVal) {
-        // 弹窗关闭时清理倒计时
         this.clearTimer()
         this.verifyCode = ''
+      } else {
+        this.userPhone = this.phone || '';
       }
     }
   },
   beforeDestroy() {
     this.clearTimer()
   },
+
+  onMounted(){
+  },  
   methods: {
     // 获取验证码
     async handleGetVerifyCode() {
       if (this.countdown > 0) return
       
-      if (!this.phone) {
+      if (!this.userPhone) {
         this.$showToast('手机号不能为空')
         return
       }
 
       try {
         this.$showLoading('发送中...')
-        
-        // 调用发送验证码接口
-        // await this.$http.post('/auth/send-verify-code', {
-        //   phone: this.phone,
-        //   type: 'changePhone'
-        // })
-        // 测试  --   待验证接口是否正确
-        const res = await sendSmsApi({
-          sjhm: this.phone,
-          ywlx: 'changePhone',
-          // 对手机号进行加密传输
-          sjhmJm: crypto.encrypt(this.phone)
-        })
-        console.log('sendSmsApi res:', res)
 
+        const res = await sendSmsApi({
+          smsStatus: 'sms:binding_phone',
+          encryptMobile: crypto.encrypt(this.userPhone)
+        })
+
+        console.log('验证码', res)
+      
         this.$showToast('验证码已发送', 'success')
         
         // 开始60秒倒计时
@@ -107,6 +115,7 @@ export default {
         }, 1000)
 
       } catch (error) {
+        this.$showToast(error.data.msg, 'error')
         console.error('发送验证码失败:', error)
       } finally {
         this.$hideLoading()
@@ -130,7 +139,7 @@ export default {
       }
       
       this.$emit('save', {
-        sjhm: this.phone,
+        sjhm: this.userPhone,
         smsCode: this.verifyCode,
 				key: 'sjhm'
       })

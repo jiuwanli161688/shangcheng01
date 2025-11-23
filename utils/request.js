@@ -60,8 +60,9 @@ class Request {
           success: async (res) => {
             console.log("响应request", res);
             if (res.statusCode === 200) {
+              uni.hideLoading();
+
               if (res.data && res.data.code && res.data.code !== 200) {
-                uni.hideLoading();
                 uni.showToast({
                   title: res.data.msg,
                   icon: "none",

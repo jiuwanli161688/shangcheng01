@@ -3,7 +3,8 @@ import { setToken, removeToken, getToken } from '@/utils/auth'
 
 const state = {
   token: getToken(),
-  userInfo: null,
+  // userInfo: null,
+  userInfo: {},
   isLogin: false
 }
 
@@ -32,8 +33,6 @@ const actions = {
       commit('SET_TOKEN', res.data.access_token)
       // 登录成功后获取用户信息
       const userRes = await getUserInfo()
-      console.log('用户信息', userRes)
-
       commit('SET_USER_INFO', userRes.data)
       return res
     } catch (error) {
@@ -69,7 +68,7 @@ const actions = {
       await logout()
       commit('CLEAR_USER_INFO')
       // 清空购物车
-      dispatch('cart/clearCart', null, { root: true })
+      // dispatch('cart/clearCart', null, { root: true })
       return Promise.resolve()
     } catch (error) {
       return Promise.reject(error)

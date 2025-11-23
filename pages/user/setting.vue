@@ -10,7 +10,7 @@
         </view>
         <image
           class="avatar"
-          :src=" userInfo.avatar|| '@/static/images/user/head.png'"
+          :src=" userInfo.data.avatar|| '/static/images/user/head.png'"
           mode="aspectFill"
           @click="updateImg"
         ></image>
@@ -19,7 +19,7 @@
         <view class="menu-left">
           <text class="menu-text">昵称</text>
         </view>
-        <view class="menu-text flex-1 menu-label" @click="showModalName=true">{{ userInfo.yhnc }}</view>
+        <view class="menu-text flex-1 menu-label" @click="showModalName=true">{{ userInfo.data.yhnc }}</view>
         <image
           class="arrow"
           src="/static/images/user/right.png"
@@ -32,7 +32,7 @@
           <text class="menu-text">手机号码</text>
         </view>
         <view class="flex-cc" @click="showModal=true">
-          <view class="menu-text flex-1 menu-label">{{ userInfo.sjhm }}</view>
+          <view class="menu-text flex-1 menu-label" style="min-width: 80px;">{{ userInfo.data.sjhm }}</view>
           <image
             class="arrow"
             src="/static/images/user/right.png"
@@ -44,21 +44,21 @@
         <view class="menu-left">
           <text class="menu-text">会员ID</text>
         </view>
-        <view class="menu-text flex-1 menu-label">{{ user.aaaaaa }}</view>
-        <image
+        <view class="menu-text flex-1 menu-label">{{ userInfo.data.userId }}</view>
+        <!-- <image
           class="arrow"
           src="/static/images/user/right.png"
           mode="aspectFill"
           style="opacity: 0"
-        ></image>
+        ></image> -->
       </view>
       <view class="menu-item">
         <view class="menu-left">
           <text class="menu-text">性别</text>
         </view>
 				<!-- <picker class="flex-1" @change="bindPickerChange" :value="sexIndex" :range="sexRange"> -->
-				<!-- <picker class="flex-1" @change="bindPickerChange" :value="userInfo.sex" :range="sexRange"> -->
-				<picker class="flex-1" @change="bindPickerChange" :value="sexIndex" :range="sexRange">
+				<picker class="flex-1" @change="bindPickerChange" :value="userInfo.data.sex" :range="sexRange">
+				<!-- <picker class="flex-1" @change="bindPickerChange" :value="sexIndex" :range="sexRange"> -->
 					<view class="menu-text flex-1 menu-label" style="text-align: right;">
 						<text>{{sexRange[sexIndex]}}</text>
 						<image
@@ -74,14 +74,14 @@
     <!-- 修改手机 -->
     <modal-phone
       :visible="showModal"
-      :phone="info.userPhone"
+      :phone="userInfo.data.sjhm"
       @close="showModal = false"
       @save="handleSave"
     />
 		<!-- 修改名称 -->
 		<modal-name
 			:visible="showModalName"
-			:name="info.userName"
+			:name="userInfo.data.yhnc"
 			@close="showModalName = false"
 			@save="handleSave"
 		/>
@@ -94,7 +94,6 @@ import CustomNavbar from "@/components/custom-navbar/custom-navbar";
 import { getNavBarHeight } from "@/utils/utils";
 import ModalPhone from "./components/modal-phone.vue";
 import ModalName from "./components/modal-name.vue";
-import user from "../../store/modules/user";
 
 export default {
   components: {
@@ -119,6 +118,9 @@ export default {
     const systemInfo = uni.getSystemInfoSync();
     this.statusBarHeight = systemInfo.statusBarHeight;
   },
+  onShow(){
+    this.sexIndex = this.userInfo.data.sex || 0
+  },
   computed: {
     ...mapState("user", ["userInfo"]),
   },
@@ -128,15 +130,19 @@ export default {
 		bindPickerChange(e) {
       const val = e.detail.value
 		  this.sexIndex = val;
-      handleSave({ sex: val })
+      this.handleSave({ sex: val })
 		},
     async handleSave(record) {
-      await this.updateUserInfo({ ...this.userInfo, ...record })
+      await this.updateUserInfo({ ...this.userInfo.data, ...record })
       uni.showToast({
         title: '修改成功！',
         icon: 'success',
         mask: true
       })
+      this.userInfo.data = { ...this.userInfo.data, ...record}
+      
+      this.showModal = false;
+      this.showModalName = false;
       console.log(" 保存信息", record);
     },
     updateImg() {
@@ -173,7 +179,6 @@ export default {
       });
     },
     async logoutHandle() {
-      console.log("退出登录");
       await this.logout();
     },
   },
