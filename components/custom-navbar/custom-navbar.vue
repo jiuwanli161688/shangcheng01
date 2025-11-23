@@ -4,7 +4,6 @@
     <view
       class="status-bar"
       :style="{ height: innerStatusBarHeight + 'px', background: backgroundColor }"
-      v-if="innerStatusBarHeight > 0"
     ></view>
 
     <view class="nav-content" :style="navContentStyle">
@@ -54,7 +53,8 @@ export default {
   },
   data() {
     return {
-      innerStatusBarHeight: 0,
+      // innerStatusBarHeight: 0,
+      innerStatusBarHeight: 20,
       innerNavBarHeight: 44,
       safeAreaInsets: { top: 0, right: 0, bottom: 0, left: 0 },
     };
@@ -65,7 +65,7 @@ export default {
     },
     navContentStyle() {
       return {
-        height: this.computedNavBarHeight + "px",
+        height: (this.computedNavBarHeight + 20 )+ "px",
         background: this.backgroundColor,
       };
     },
@@ -103,10 +103,12 @@ export default {
               }
             } catch (e) {
               // 不做日志，仅降级默认值
-              this.innerNavBarHeight = sys.platform === "android" ? 48 : 44;
+              // this.innerNavBarHeight = sys.platform === "android" ? 48 : 44;
+              this.innerNavBarHeight = sys.platform === "android" ? 68 : 64;
             }
           } else {
-            this.innerNavBarHeight = sys.platform === "android" ? 48 : 44;
+			  // this.innerNavBarHeight = sys.platform === "android" ? 48 : 44;
+            this.innerNavBarHeight = sys.platform === "android" ? 68 : 64;
           }
         },
       });
@@ -152,7 +154,7 @@ export default {
   padding: 12rpx 30rpx;
   position: relative;
   height: 100%;
-  transition: background-color 0.3s, box-shadow 0.3s;
+  // transition: background-color 0.3s, box-shadow 0.3s;
   &::after {
     content: "";
     position: absolute;

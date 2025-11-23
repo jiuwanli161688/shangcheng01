@@ -69,6 +69,10 @@ const actions = {
       commit('CLEAR_USER_INFO')
       // 清空购物车
       // dispatch('cart/clearCart', null, { root: true })
+	  
+	  uni.switchTab({
+		url: '/pages/user/user'
+	  });
       return Promise.resolve()
     } catch (error) {
       return Promise.reject(error)
