@@ -277,8 +277,14 @@ export default {
     ...mapActions("user", ["login", "getUserInfo"]),
     getTopHeight: getNavBarHeight,
     getLogin() {
+      
+
       const that = this;
       if (this.userInfo.userId) return;
+      
+      uni.redirectTo({ url: '/pages/user/login' });
+      return
+      
       uni.login({
         provider: "weixin", //使用微信登录
         success: async function (loginRes) {
