@@ -5,7 +5,7 @@
     <!-- 红色头部区域 -->
     <view
       class="header-section"
-      :style="{ paddingTop: (getTopHeight() + 10) + 'px' }"
+      :style="{ marginTop: getTopHeight() - 5 + 'px' }"
     >
       <!-- 用户信息 -->
       <view class="user-info">
@@ -243,23 +243,7 @@ export default {
     // 获取用户信息
     if (token) {
       this.getUserInfo();
-    } else {
-		this.wallet = {
-			hongbaoNum: '-',
-			kaquanNum: '-',
-			ljtx: '-',
-			remark: "-",
-			userId: '-',
-			zhye: '-',
-			zsye: '-',
-		}
-		this.orderTabs = this.orderTabs.map((item, inx) => {
-		  return {
-		    ...item,
-		    badge: 0,
-		  };
-		});
-	}
+    }
   },
   watch: {
     userInfo(newVal) {
@@ -382,8 +366,6 @@ export default {
 .header-section {
   background: linear-gradient(135deg, #f60808 0%, #f60808 100%);
   padding: 36rpx 32rpx 64rpx;
-  margin-top: -2px;
-  z-index: 2;
 }
 
 .header-top {
