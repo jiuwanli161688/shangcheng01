@@ -86,7 +86,9 @@ export default {
   justify-content: center;
   max-height: 100vh;
   background-color: #ffffff;
-  padding-top: 100rpx;
+  height: 100vh;
+  padding-bottom: 100rpx;
+  box-sizing: border-box;
 }
 
 .logo-area {
