@@ -261,10 +261,8 @@ export default {
     ...mapActions("user", ["login", "getUserInfo"]),
     getTopHeight: getNavBarHeight,
     getLogin() {
-      
-
       const that = this;
-      if (this.userInfo.userId) return;
+      if (this.userInfo && this.userInfo.userId) return;
       
       uni.redirectTo({ url: '/pages/user/login' });
       return

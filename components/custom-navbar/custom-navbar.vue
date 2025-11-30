@@ -1,23 +1,14 @@
 <template>
-  <view class="custom-navbar-diy" :style="navbarStyle">
-    <!-- 状态栏占位，可通过 props 传入 statusBarHeight -->
-    <view
-      class="status-bar"
-      :style="{ height: innerStatusBarHeight + 'px', background: backgroundColor }"
-      v-if="innerStatusBarHeight > 0"
-    ></view>
-
-    <view class="nav-content" :style="navContentStyle">
+  <view class="custom-navbar-diy">
+    <view class="nav-content" :style="{ height: '60px' }">
       <!-- 左侧区块：可插槽也可显示返回 -->
       <view v-if="showBack" class="nav-left">
         <slot name="left">
           <view class="back-btn" :class="{ opcity: !showBack }" @click="handleBack">
-            <text class="back-icon">
-              <slot name="back-icon">‹</slot>
-            </text>
             <text class="back-text" v-if="showBackText">
               <slot name="back-text">返回</slot>
             </text>
+            <uni-icons v-else type="left" size="20" color="#fff"></uni-icons>
           </view>
         </slot>
       </view>
@@ -57,16 +48,16 @@ export default {
       innerStatusBarHeight: 0,
       innerNavBarHeight: 44,
       safeAreaInsets: { top: 0, right: 0, bottom: 0, left: 0 },
+      statusBarHeightNew: 0,
     };
   },
   computed: {
     navbarStyle() {
-      return { background: this.backgroundColor };
+      return { background: 'blue', paddingTop: 20 + 'px' };
     },
     navContentStyle() {
       return {
-        height: this.computedNavBarHeight + "px",
-        background: this.backgroundColor,
+        height: (this.statusBarHeightNew + this.computedNavBarHeight) + 'px',
       };
     },
     computedStatusBarHeight() {
@@ -77,6 +68,9 @@ export default {
     },
   },
   mounted() {
+    const systemInfo = uni.getSystemInfoSync()
+    console.log('systemInfo', systemInfo)
+    this.statusBarHeightNew = systemInfo.top || 20
     // 若外部未传入，则自动获取
     if (!this.statusBarHeight || !this.navBarHeight) {
       this.getSystemInfo();
@@ -135,40 +129,22 @@ export default {
   top: 0;
   left: 0;
   width: 100%;
-  z-index: 9900; // 建议统一管理z-index
+  z-index: 9900; 
   background: $bg-color-red;
   transition: background-color 0.3s;
 }
 
 .status-bar {
   width: 100%;
-  transition: background-color 0.3s;
 }
 
 .nav-content {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12rpx 30rpx;
+  padding: 28rpx 30rpx 0;
   position: relative;
-  height: 100%;
   transition: background-color 0.3s, box-shadow 0.3s;
-  &::after {
-    content: "";
-    position: absolute;
-    left: 0;
-    bottom: 0;
-    width: 100%;
-    height: 1rpx;
-    background: linear-gradient(
-      90deg,
-      transparent 0%,
-      rgba(0, 0, 0, 0.06) 20%,
-      rgba(0, 0, 0, 0.06) 80%,
-      transparent 100%
-    );
-    opacity: 0.6;
-  }
 }
 
 .nav-left {

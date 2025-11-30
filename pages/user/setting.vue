@@ -1,7 +1,7 @@
 <template>
   <view class="member-page">
     <!-- 顶部状态栏 -->
-    <custom-navbar title="会员中心" />
+    <custom-navbar :showBack="true" title="个人设置" />
     <!-- 列表 -->
     <view class="menu-list" :style="{ marginTop: getTopHeight() - 5 + 'px' }">
       <view class="menu-item menu-item-avatar">
@@ -14,6 +14,7 @@
           mode="aspectFill"
           @click="updateImg"
         ></image>
+        <uni-icons class="close-btn" type="close" size="15" color="#ccc"></uni-icons>
       </view>
       <view class="menu-item">
         <view class="menu-left">
@@ -233,7 +234,7 @@ export default {
 /* 菜单列表 */
 .menu-list {
   background: #ffffff;
-  margin-top: 12rpx;
+  margin-top: 20rpx;
   padding: 0 32rpx;
 }
 
@@ -246,6 +247,7 @@ export default {
 }
 
 .menu-item.menu-item-avatar {
+  position: relative;
   height: 160rpx;
 }
 
@@ -312,5 +314,10 @@ export default {
   display: flex;
   justify-content: flex-end;
   align-items: center;
+}
+.close-btn {
+  position: absolute;
+  top: 24rpx;
+  right: -6rpx;
 }
 </style>

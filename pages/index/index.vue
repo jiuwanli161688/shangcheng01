@@ -1,401 +1,305 @@
 <template>
-  <view class="container">
-    <!-- 顶部导航栏 -->
-    <view class="header">
-      <view class="header-left">
-        <text class="logo">创享家批发</text>
-        <image class="icon" src="/static/icons/translate.png" mode="aspectFit"></image>
-        <view class="badge">
-          <text class="badge-text">分享</text>
+  <view class="index-container">
+    <!-- 顶部导航 -->
+    <view class="header" :style="{ paddingTop: statusBarHeight + 'px' }">
+      <view class="header-content">
+        <view class="shop-info">
+          <text class="shop-name">创享家批发</text>
+          <uni-icons type="bottom" size="14" color="#fff" />
         </view>
-      </view>
-      <view class="header-right">
-        <image class="icon" src="/static/icons/location.png" mode="aspectFit"></image>
-        <image class="icon" src="/static/icons/message.png" mode="aspectFit"></image>
-        <image class="icon" src="/static/icons/more.png" mode="aspectFit"></image>
+        <view class="header-actions">
+          <view class="action-btn">
+            <text class="action-text">自购</text>
+          </view>
+          <view class="action-btn share-btn">
+            <text class="action-text">分享</text>
+            <uni-icons type="redo" size="12" color="#f60808" />
+          </view>
+          <uni-icons type="scan" size="22" color="#fff" class="icon-gap" />
+          <view class="menu-dots">
+            <text class="dot">•••</text>
+          </view>
+        </view>
       </view>
     </view>
 
     <!-- 搜索栏 -->
     <view class="search-bar">
       <view class="search-input">
-        <image class="search-icon" src="/static/icons/search.png" mode="aspectFit"></image>
-        <text class="search-placeholder">搜索商品</text>
+        <uni-icons type="search" size="16" color="#999" />
+        <input type="text" placeholder="搜索商品" placeholder-class="placeholder" />
       </view>
-      <image class="scan-icon" src="/static/icons/scan.png" mode="aspectFit"></image>
+      <view class="scan-btn">
+        <uni-icons type="scan" size="22" color="#333" />
+      </view>
     </view>
 
-    <!-- 分类导航 -->
-    <scroll-view class="category-nav" scroll-x :show-scrollbar="false">
-			<v-tabs v-model="currentCategory" :tabs="categories" @change="selectCategory" lineColor="linear-gradient(to right, red, gold)" activeColor="red"></v-tabs>
+    <!-- 分类标签 -->
+    <scroll-view scroll-x class="category-scroll" :show-scrollbar="false">
+      <v-tabs v-model="currentCategory" :tabs="categories" @change="selectCategory" lineColor="linear-gradient(to right, red, gold)" activeColor="red"></v-tabs>
     </scroll-view>
 
-    <scroll-view class="main-content" scroll-y>
-      <!-- 轮播图 -->
-      <swiper class="banner" indicator-dots indicator-color="rgba(255,255,255,0.5)" indicator-active-color="#fff" autoplay circular>
-        <swiper-item v-for="(banner, index) in banners" :key="index">
-          <image class="banner-image" :src="banner" mode="aspectFill"></image>
+    <!-- 内容区域 -->
+    <scroll-view scroll-y class="content-scroll">
+      <!-- Banner轮播 -->
+      <swiper class="banner-swiper" indicator-dots circular autoplay>
+        <swiper-item v-for="(item, index) in banners" :key="index">
+          <view class="banner-item">
+            <image :src="item.image" mode="aspectFit" class="banner-image" />
+          </view>
         </swiper-item>
       </swiper>
 
-      <!-- 公告 -->
-      <view v-if="false" class="notice">
-        <image class="notice-icon" src="/static/icons/notice.png" mode="aspectFit"></image>
-        <text class="notice-text">请关注本店发布的公告通知</text>
+      <!-- 公告栏 -->
+      <view class="notice-bar">
+        <uni-icons type="sound" size="16" color="#333" />
+        <swiper 
+          class="notice-swiper" 
+          vertical 
+          autoplay 
+          circular 
+          :interval="3200" 
+          :duration="500"
+        >
+          <swiper-item v-for="(item, index) in notices" :key="index">
+            <text class="notice-text">{{ item }}</text>
+          </swiper-item>
+        </swiper>
         <text class="notice-more">更多</text>
-      </view>
-      <view class="notice">
-         <Notice 
-					ref="importantNotice"
-					text="请关注本店发布的公告通知1"
-					:duration="8"
-					background-color="#fee2e2"
-					text-color="#dc2626"
-					height="90rpx"
-					@click="onNoticeClick"
-				/>
       </view>
 
       <!-- 新品推荐 -->
       <view class="section">
         <view class="section-header">
-          <image class="section-icon" src="/static/icons/new.png" mode="aspectFit"></image>
-          <text class="section-title">新品推荐</text>
-          <text class="section-subtitle">本店上新推荐优质商品</text>
+          <view class="section-title">
+            <text class="fire-icon">🔥</text>
+            <text class="title-text">新品推荐</text>
+            <text class="title-desc">本店上新推荐优质新品</text>
+          </view>
         </view>
         <swiper 
           class="product-swiper" 
-          :indicator-dots="true"
-          :indicator-active-color="'#e64340'"
-          :indicator-color="'#e0e0e0'"
-          circular
+          :indicator-dots="false"
+          :current="newProductsIndex"
+          @change="onNewProductsChange"
         >
           <swiper-item v-for="(page, pageIndex) in newProductPages" :key="pageIndex">
-            <view class="swiper-page">
-              <view class="product-card" v-for="(product, index) in page" :key="index" @click="goToDetail(product.id)">
-                <image class="product-image" :src="product.image" mode="aspectFill"></image>
-                <text class="product-name">{{ product.name }}</text>
-                <view class="product-footer">
-                  <text class="product-price">¥{{ product.price }}</text>
-                  <view class="add-cart-btn">
-                    <image class="cart-icon" src="/static/icons/cart-add.png" mode="aspectFit"></image>
+            <view class="product-list">
+              <view v-for="(item, index) in page" :key="index" class="product-item">
+                <image :src="item.image" mode="aspectFill" class="product-image" />
+                <text class="product-name">{{ item.name }}</text>
+                <view class="product-price-row">
+                  <text class="product-price">¥{{ item.price }}</text>
+                  <text class="product-origin-price">¥{{ item.originPrice }}</text>
+                  <view class="cart-btn">
+                    <uni-icons type="cart" size="14" color="#f60808" />
                   </view>
                 </view>
-                <text class="product-desc">{{ product.desc }}</text>
               </view>
             </view>
           </swiper-item>
         </swiper>
+        <view class="dots-indicator">
+          <view 
+            v-for="(page, i) in newProductPages" 
+            :key="i" 
+            :class="['dot', { active: newProductsIndex === i }]"
+          ></view>
+        </view>
       </view>
 
       <!-- 热销榜单 -->
       <view class="section">
         <view class="section-header">
-          <image class="section-icon" src="/static/icons/hot.png" mode="aspectFit"></image>
-          <text class="section-title">热销榜单</text>
-          <text class="section-subtitle">看看大家都在买什么</text>
+          <view class="section-title">
+            <text class="fire-icon">🔥</text>
+            <text class="title-text">热销榜单</text>
+            <text class="title-desc">看看大家都在买什么</text>
+          </view>
         </view>
         <swiper 
           class="hot-swiper" 
-          :indicator-dots="true"
-          :indicator-active-color="'#e64340'"
-          :indicator-color="'#e0e0e0'"
-          circular
+          :indicator-dots="false"
+          :current="hotProductsIndex"
+          @change="onHotProductsChange"
         >
           <swiper-item v-for="(page, pageIndex) in hotProductPages" :key="pageIndex">
             <view class="hot-list">
-              <view class="hot-item" v-for="(item, index) in page" :key="index" @click="goToDetail(item.id)">
-                <view class="hot-badge" :class="'badge-' + item.badge">
-                  <text class="badge-label">{{ item.badgeText }}</text>
+              <view v-for="(item, index) in page" :key="index" class="hot-item">
+                <view class="hot-rank">
+                  <view :class="['rank-badge', 'rank-' + (pageIndex * 3 + index + 1)]">
+                    TOP{{ pageIndex * 3 + index + 1 }}
+                  </view>
                 </view>
-                <image class="hot-image" :src="item.image" mode="aspectFill"></image>
+                <image :src="item.image" mode="aspectFill" class="hot-image" />
                 <view class="hot-info">
                   <text class="hot-name">{{ item.name }}</text>
-                  <view class="hot-footer">
-                    <view class="price-box">
-                      <text class="hot-price">¥{{ item.price }}</text>
-                      <text class="hot-unit">/{{ item.unit }}</text>
-                    </view>
-                    <view class="hot-tags">
-                      <text class="tag">零售不发货</text>
-                      <text class="tag">低价不售货</text>
-                    </view>
-                    <view class="add-cart-btn">
-                      <image class="cart-icon" src="/static/icons/cart-add.png" mode="aspectFit"></image>
-                    </view>
+                  <view class="hot-price-row">
+                    <text class="hot-price">¥{{ item.price }}</text>
+                    <text class="hot-unit">/{{ item.unit }}</text>
                   </view>
+                  <view class="hot-tags">
+                    <text class="hot-origin-price">零售¥{{ item.originPrice }}</text>
+                    <text class="hot-stock">还30天卖300件</text>
+                  </view>
+                </view>
+                <view class="hot-cart">
+                  <uni-icons type="cart" size="18" color="#f60808" />
                 </view>
               </view>
             </view>
           </swiper-item>
         </swiper>
+        <view class="dots-indicator">
+          <view 
+            v-for="(page, i) in hotProductPages" 
+            :key="i" 
+            :class="['dot', { active: hotProductsIndex === i }]"
+          ></view>
+        </view>
       </view>
 
       <!-- 商家特卖 -->
       <view class="section">
-        <view class="section-header special">
-          <image class="section-icon" src="/static/icons/special.png" mode="aspectFit"></image>
-          <text class="section-title">商家特卖</text>
-        </view>
-        <view class="special-tags">
-          <text class="special-tag">厂家优惠</text>
-          <text class="special-tag">商家共赢</text>
+        <view class="section-header special-header">
+          <view class="section-title">
+            <text class="crown-icon">👑</text>
+            <text class="title-text">商家特卖</text>
+          </view>
+          <view class="special-tags">
+            <text class="special-tag">厂家放量</text>
+            <text class="special-tag">商家共赢</text>
+          </view>
         </view>
         <swiper 
           class="special-swiper" 
-          :indicator-dots="true"
-          :indicator-active-color="'#e64340'"
-          :indicator-color="'#e0e0e0'"
-          circular
+          :indicator-dots="false"
+          :current="specialProductsIndex"
+          @change="onSpecialProductsChange"
         >
           <swiper-item v-for="(page, pageIndex) in specialProductPages" :key="pageIndex">
-            <view class="product-grid">
-              <view class="grid-item" v-for="(product, index) in page" :key="index" @click="goToDetail(product.id)">
-                <image class="grid-image" :src="product.image" mode="aspectFill"></image>
-                <text class="grid-name">{{ product.name }}</text>
-                <view class="grid-footer">
-                  <view class="price-box">
-                    <text class="grid-price">¥{{ product.price }}</text>
-                    <text class="grid-unit">/{{ product.unit }}</text>
-                  </view>
-                  <view class="add-cart-btn">
-                    <image class="cart-icon" src="/static/icons/cart-add.png" mode="aspectFit"></image>
+            <view class="special-grid">
+              <view v-for="(item, index) in page" :key="index" class="special-item">
+                <image :src="item.image" mode="aspectFill" class="special-image" />
+                <text class="special-name">{{ item.name }}</text>
+                <view class="special-price-row">
+                  <text class="special-price">¥{{ item.price }}</text>
+                  <text class="special-unit">/件</text>
+                  <view class="special-cart">
+                    <uni-icons type="cart" size="14" color="#f60808" />
                   </view>
                 </view>
-                <text class="grid-desc">{{ product.desc }}</text>
+                <text class="special-origin-price">零售¥{{ item.originPrice }}</text>
               </view>
             </view>
           </swiper-item>
         </swiper>
+        <view class="dots-indicator">
+          <view 
+            v-for="(page, i) in specialProductPages" 
+            :key="i" 
+            :class="['dot', { active: specialProductsIndex === i }]"
+          ></view>
+        </view>
       </view>
 
       <!-- 底部信息 -->
       <view class="footer-info">
-        <text class="footer-text">经营者：广州商香贸易公司</text>
-        <text class="footer-text">请确认本店主: 经营者 17798807798988 ☎</text>
+        <text class="company-name">创享家(广西)信息有限公司</text>
+        <text class="company-desc">提供极速技术支持 平台服务: 19807717688</text>
       </view>
     </scroll-view>
-
   </view>
 </template>
 
 <script>
-import Notice from '@/components/notice/notice.vue'
 
 export default {
-  components: {
-    Notice
-  },
+
   data() {
     return {
+      statusBarHeight: 20,
       currentCategory: 0,
-      categories: ['推荐', '美妆个护', '营养美食', '居家生活', '手机', '其他', '电脑'],
+      newProductsIndex: 0,
+      hotProductsIndex: 0,
+      specialProductsIndex: 0,
+      categories: ['推荐', '美妆个护', '营养美食', '居家生活', '手机数码'],
       banners: [
-        '/static/images/banner1.jpg',
-        '/static/images/banner2.jpg',
-        '/static/images/banner3.jpg'
+        {
+          title: '极致生活',
+          subtitle: '照亮你的美',
+          date: '活动时间：2019/11/17-2019/11/26',
+          bg: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+          image: '/static/logo.png'
+        },
+        {
+          title: '极致生活',
+          subtitle: '照亮你的美',
+          date: '活动时间：2019/11/17-2019/11/26',
+          bg: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+          image: '/static/logo.png'
+        }
       ],
       newProducts: [
-        {
-          id: 1,
-          name: '修护精华霜/修护精华保湿...',
-          price: '68.9',
-          desc: '零售不发货',
-          image: '/static/products/product1.jpg'
-        },
-        {
-          id: 2,
-          name: '修护精华霜/修护精华保湿...',
-          price: '68.9',
-          desc: '零售不发货',
-          image: '/static/products/product2.jpg'
-        },
-        {
-          id: 3,
-          name: '修护精华霜/修护精华保湿...',
-          price: '68.9',
-          desc: '零售不发货',
-          image: '/static/products/product3.jpg'
-        },
-        {
-          id: 4,
-          name: '修护精华霜/修护精华保湿...',
-          price: '68.9',
-          desc: '零售不发货',
-          image: '/static/products/product1.jpg'
-        },
-        {
-          id: 5,
-          name: '修护精华霜/修护精华保湿...',
-          price: '68.9',
-          desc: '零售不发货',
-          image: '/static/products/product2.jpg'
-        },
-        {
-          id: 6,
-          name: '修护精华霜/修护精华保湿...',
-          price: '68.9',
-          desc: '零售不发货',
-          image: '/static/products/product3.jpg'
-        }
+        { name: '修护精华霜修护精华霜修护精...', price: '68.9', originPrice: '98.9', image: '/placeholder.svg?height=120&width=120' },
+        { name: '修护精华霜修护精华霜修护精...', price: '68.9', originPrice: '68.9', image: '/placeholder.svg?height=120&width=120' },
+        { name: '修护精华霜修护精华霜修护精...', price: '68.9', originPrice: '68.9', image: '/placeholder.svg?height=120&width=120' },
+        { name: '修护精华霜修护精华霜修护精...', price: '68.9', originPrice: '68.9', image: '/placeholder.svg?height=120&width=120' },
+        { name: '修护精华霜修护精华霜修护精...', price: '78.9', originPrice: '108.9', image: '/placeholder.svg?height=120&width=120' },
+        { name: '修护精华霜修护精华霜修护精...', price: '88.9', originPrice: '118.9', image: '/placeholder.svg?height=120&width=120' }
       ],
       hotProducts: [
-        {
-          id: 1,
-          name: 'SK-II神仙四部曲修护精华霜试用装 35ml装',
-          price: '29.9',
-          unit: '套',
-          badge: 'new',
-          badgeText: '新人',
-          image: '/static/products/hot1.jpg'
-        },
-        {
-          id: 2,
-          name: 'SK-II神仙四部曲修护精华霜试用装 35ml装',
-          price: '29.9',
-          unit: '套',
-          badge: 'hot',
-          badgeText: '热卖',
-          image: '/static/products/hot2.jpg'
-        },
-        {
-          id: 3,
-          name: 'SK-II神仙四部曲修护精华霜试用装 35ml装',
-          price: '29.9',
-          unit: '套',
-          badge: 'hot',
-          badgeText: '热卖',
-          image: '/static/products/hot3.jpg'
-        },
-        {
-          id: 4,
-          name: 'SK-II神仙四部曲修护精华霜试用装 35ml装',
-          price: '29.9',
-          unit: '套',
-          badge: 'new',
-          badgeText: '新人',
-          image: '/static/products/hot1.jpg'
-        },
-        {
-          id: 5,
-          name: 'SK-II神仙四部曲修护精华霜试用装 35ml装',
-          price: '29.9',
-          unit: '套',
-          badge: 'hot',
-          badgeText: '热卖',
-          image: '/static/products/hot2.jpg'
-        },
-        {
-          id: 6,
-          name: 'SK-II神仙四部曲修护精华霜试用装 35ml装',
-          price: '29.9',
-          unit: '套',
-          badge: 'hot',
-          badgeText: '热卖',
-          image: '/static/products/hot3.jpg'
-        }
+        { name: 'SK-II微肌因赋活修护精华试用装35ml装', price: '29.9', unit: '瓶', originPrice: '68.9', image: '/placeholder.svg?height=100&width=100' },
+        { name: 'SK-II微肌因赋活修护精华试用装35ml装', price: '29.9', unit: '瓶', originPrice: '68.9', image: '/placeholder.svg?height=100&width=100' },
+        { name: 'SK-II微肌因赋活修护精华试用装35ml装', price: '29.9', unit: '瓶', originPrice: '68.9', image: '/placeholder.svg?height=100&width=100' },
+        { name: 'SK-II微肌因赋活修护精华试用装35ml装', price: '39.9', unit: '瓶', originPrice: '88.9', image: '/placeholder.svg?height=100&width=100' },
+        { name: 'SK-II微肌因赋活修护精华试用装35ml装', price: '49.9', unit: '瓶', originPrice: '98.9', image: '/placeholder.svg?height=100&width=100' },
+        { name: 'SK-II微肌因赋活修护精华试用装35ml装', price: '59.9', unit: '瓶', originPrice: '108.9', image: '/placeholder.svg?height=100&width=100' }
       ],
       specialProducts: [
-        {
-          id: 1,
-          name: '法国兰LANCOM 小黑瓶眼霜 15ml',
-          price: '299',
-          unit: '套',
-          desc: '零售不发货',
-          image: '/static/products/special1.jpg'
-        },
-        {
-          id: 2,
-          name: '法国兰LANCOM 小黑瓶眼霜 15ml',
-          price: '299',
-          unit: '套',
-          desc: '零售不发货',
-          image: '/static/products/special2.jpg'
-        },
-        {
-          id: 3,
-          name: '法国兰LANCOM 小黑瓶眼霜 15ml',
-          price: '299',
-          unit: '套',
-          desc: '零售不发货',
-          image: '/static/products/special3.jpg'
-        },
-        {
-          id: 4,
-          name: '法国兰LANCOM 小黑瓶眼霜 15ml',
-          price: '299',
-          unit: '套',
-          desc: '零售不发货',
-          image: '/static/products/special4.jpg'
-        },
-        {
-          id: 5,
-          name: '法国兰LANCOM 小黑瓶眼霜 15ml',
-          price: '299',
-          unit: '套',
-          desc: '零售不发货',
-          image: '/static/products/special5.jpg'
-        },
-        {
-          id: 6,
-          name: '法国兰LANCOM 小黑瓶眼霜 15ml',
-          price: '299',
-          unit: '套',
-          desc: '零售不发货',
-          image: '/static/products/special6.jpg'
-        },
-        {
-          id: 7,
-          name: '法国兰LANCOM 小黑瓶眼霜 15ml',
-          price: '299',
-          unit: '套',
-          desc: '零售不发货',
-          image: '/static/products/special1.jpg'
-        },
-        {
-          id: 8,
-          name: '法国兰LANCOM 小黑瓶眼霜 15ml',
-          price: '299',
-          unit: '套',
-          desc: '零售不发货',
-          image: '/static/products/special2.jpg'
-        },
-        {
-          id: 9,
-          name: '法国兰LANCOM 小黑瓶眼霜 15ml',
-          price: '299',
-          unit: '套',
-          desc: '零售不发货',
-          image: '/static/products/special3.jpg'
-        }
+        { name: '法国兰LANCOME小黑瓶眼霜 15ml', price: '299', originPrice: '969', image: '/placeholder.svg?height=100&width=100' },
+        { name: '法国兰LANCOME小黑瓶眼霜 15ml', price: '299', originPrice: '969', image: '/placeholder.svg?height=100&width=100' },
+        { name: '法国兰LANCOME小黑瓶眼霜 15ml', price: '299', originPrice: '969', image: '/placeholder.svg?height=100&width=100' },
+        { name: '法国兰LANCOME小黑瓶眼霜 15ml', price: '299', originPrice: '969', image: '/placeholder.svg?height=100&width=100' },
+        { name: '法国兰LANCOME小黑瓶眼霜 15ml', price: '299', originPrice: '969', image: '/placeholder.svg?height=100&width=100' },
+        { name: '法国兰LANCOME小黑瓶眼霜 15ml', price: '299', originPrice: '969', image: '/placeholder.svg?height=100&width=100' },
+        { name: '法国兰LANCOME小黑瓶眼霜 15ml', price: '329', originPrice: '999', image: '/placeholder.svg?height=100&width=100' },
+        { name: '法国兰LANCOME小黑瓶眼霜 15ml', price: '359', originPrice: '1099', image: '/placeholder.svg?height=100&width=100' },
+        { name: '法国兰LANCOME小黑瓶眼霜 15ml', price: '389', originPrice: '1199', image: '/placeholder.svg?height=100&width=100' }
+      ],
+      notices: [
+        '请关注本店发布的公告通知',
+        '会员日下单享受满200减50优惠',
+        '仓库搬迁升级，发货时间顺延1-2天，感谢理解'
       ]
     }
   },
   computed: {
     newProductPages() {
-      const pageSize = 3
       const pages = []
-      for (let i = 0; i < this.newProducts.length; i += pageSize) {
-        pages.push(this.newProducts.slice(i, i + pageSize))
+      for (let i = 0; i < this.newProducts.length; i += 3) {
+        pages.push(this.newProducts.slice(i, i + 3))
       }
       return pages
     },
     hotProductPages() {
-      const pageSize = 3
       const pages = []
-      for (let i = 0; i < this.hotProducts.length; i += pageSize) {
-        pages.push(this.hotProducts.slice(i, i + pageSize))
+      for (let i = 0; i < this.hotProducts.length; i += 3) {
+        pages.push(this.hotProducts.slice(i, i + 3))
       }
       return pages
     },
     specialProductPages() {
-      const pageSize = 6
       const pages = []
-      for (let i = 0; i < this.specialProducts.length; i += pageSize) {
-        pages.push(this.specialProducts.slice(i, i + pageSize))
+      for (let i = 0; i < this.specialProducts.length; i += 6) {
+        pages.push(this.specialProducts.slice(i, i + 6))
       }
       return pages
     }
+  },
+  onLoad() {
+    const systemInfo = uni.getSystemInfoSync()
+    this.statusBarHeight = systemInfo.statusBarHeight || 20
   },
   methods: {
     selectCategory(index) {
@@ -403,70 +307,97 @@ export default {
       // 可以在这里添加筛选逻辑
       console.log('[v0] 选中分类:', this.categories[index])
     },
-    goToDetail(id) {
-      uni.navigateTo({
-        url: `/pages/product/detail?id=${id}`
-      })
+    onNewProductsChange(e) {
+      this.newProductsIndex = e.detail.current
+    },
+    onHotProductsChange(e) {
+      this.hotProductsIndex = e.detail.current
+    },
+    onSpecialProductsChange(e) {
+      this.specialProductsIndex = e.detail.current
     }
   }
 }
 </script>
 
 <style lang="scss" scoped>
-.container {
+.index-container {
   display: flex;
   flex-direction: column;
   height: 100vh;
   background-color: #f5f5f5;
-	padding: 0;
 }
 
 .header {
+  background: #f60808;
+  padding-bottom: 20rpx;
+}
+
+.header-content {
   display: flex;
-  justify-content: space-between;
   align-items: center;
   padding: 20rpx 30rpx;
-  background: linear-gradient(90deg, #e64340 0%, #f55f5a 100%);
-  color: #fff;
 }
 
-.header-left {
+.shop-info {
   display: flex;
   align-items: center;
-  gap: 20rpx;
+  gap: 8rpx;
 }
 
-.logo {
-  font-size: 36rpx;
+.shop-name {
+  color: #fff;
+  font-size: 32rpx;
   font-weight: bold;
 }
 
-.icon {
-  width: 40rpx;
-  height: 40rpx;
-}
-
-.badge {
-  padding: 4rpx 16rpx;
-  border: 2rpx solid #fff;
-  border-radius: 30rpx;
-}
-
-.badge-text {
-  font-size: 24rpx;
-}
-
-.header-right {
+.header-actions {
   display: flex;
-  gap: 30rpx;
   align-items: center;
+  gap: 16rpx;
+}
+
+.action-btn {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 20rpx;
+  padding: 6rpx 16rpx;
+  display: flex;
+  align-items: center;
+  gap: 4rpx;
+}
+
+.share-btn {
+  background: #fff;
+  .action-text {
+    color: #f60808;
+  }
+}
+
+.action-text {
+  color: #fff;
+  font-size: 22rpx;
+}
+
+.icon-gap {
+  margin-left: 8rpx;
+}
+
+.menu-dots {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 20rpx;
+  padding: 4rpx 12rpx;
+}
+
+.dot {
+  color: #fff;
+  font-size: 20rpx;
 }
 
 .search-bar {
   display: flex;
   align-items: center;
-  padding: 20rpx 30rpx;
-  background: linear-gradient(90deg, #e64340 0%, #f55f5a 100%);
+  padding: 16rpx 30rpx;
+  background: #fff;
   gap: 20rpx;
 }
 
@@ -474,71 +405,113 @@ export default {
   flex: 1;
   display: flex;
   align-items: center;
+  background: #f5f5f5;
+  border-radius: 36rpx;
   padding: 16rpx 24rpx;
-  background-color: #fff;
-  border-radius: 60rpx;
-  gap: 16rpx;
-}
-
-.search-icon {
-  width: 32rpx;
-  height: 32rpx;
-}
-
-.search-placeholder {
-  font-size: 28rpx;
-  color: #999;
-}
-
-.scan-icon {
-  width: 48rpx;
-  height: 48rpx;
-}
-
-.category-nav {
-  display: flex;
-  padding: 20rpx 26rpx;
-  background-color: #fff;
-  white-space: nowrap;
-	box-sizing: border-box;
-}
-
-.nav-item {
-  display: inline-block;
-  padding: 12rpx 32rpx;
-  font-size: 28rpx;
-  color: #333;
-  margin-right: 40rpx;
-  position: relative;
-  transition: all 0.3s ease;
+  gap: 12rpx;
   
-  /* 激活状态使用渐变色底部边框 */
+  input {
+    flex: 1;
+    font-size: 28rpx;
+  }
+}
+
+.placeholder {
+  color: #999;
+  font-size: 28rpx;
+}
+
+.category-scroll {
+  white-space: nowrap;
+  background: #fff;
+  border-bottom: 1rpx solid #eee;
+}
+
+.category-list {
+  display: inline-flex;
+  padding: 0 20rpx;
+}
+
+.category-item {
+  padding: 24rpx 30rpx;
+  font-size: 28rpx;
+  color: #666;
+  position: relative;
+  
   &.active {
-    color: #e64340;
+    color: #f60808;
     font-weight: bold;
     
     &::after {
       content: '';
       position: absolute;
-      left: 0;
-      right: 0;
       bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 40rpx;
       height: 4rpx;
-      background: linear-gradient(90deg, #e64340 0%, #f55f5a 100%);
+      background: #f60808;
       border-radius: 2rpx;
     }
   }
 }
 
-.main-content {
+.content-scroll {
   flex: 1;
   overflow-y: auto;
 }
 
-.banner {
-  height: 400rpx;
-  position: relative;
-  margin-bottom: 20rpx;
+.banner-swiper {
+  height: 280rpx;
+  margin: 20rpx;
+  border-radius: 16rpx;
+  overflow: hidden;
+}
+
+.banner-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 100%;
+  background: #f8f8f8;
+  .image {
+    width: 100%;
+    height: 100%;
+  }
+}
+
+.banner-text {
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+}
+
+.banner-title {
+  color: #fff;
+  font-size: 36rpx;
+  font-weight: bold;
+}
+
+.banner-subtitle {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 28rpx;
+}
+
+.banner-btn {
+  margin-top: 16rpx;
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+  font-size: 22rpx;
+  padding: 8rpx 20rpx;
+  border-radius: 20rpx;
+  display: inline-block;
+  width: fit-content;
+}
+
+.banner-date {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 20rpx;
+  margin-top: 8rpx;
 }
 
 .banner-image {
@@ -546,24 +519,25 @@ export default {
   height: 100%;
 }
 
-.notice {
+.notice-bar {
   display: flex;
   align-items: center;
-  padding: 20rpx 30rpx;
-  background-color: #fff;
-  margin-bottom: 20rpx;
+  background: #fff;
+  margin: 0 20rpx 20rpx;
+  padding: 20rpx 24rpx;
+  border-radius: 12rpx;
+  gap: 12rpx;
 }
 
-.notice-icon {
-  width: 32rpx;
-  height: 32rpx;
-  margin-right: 16rpx;
+.notice-swiper {
+  flex: 1;
+  height: 40rpx;
 }
 
 .notice-text {
-  flex: 1;
   font-size: 26rpx;
   color: #333;
+  line-height: 40rpx;
 }
 
 .notice-more {
@@ -572,320 +546,340 @@ export default {
 }
 
 .section {
-  background-color: #fff;
-  margin-bottom: 20rpx;
-  padding: 30rpx;
+  background: #fff;
+  margin: 0 20rpx 20rpx;
+  border-radius: 16rpx;
+  padding: 24rpx;
 }
 
 .section-header {
-  display: flex;
-  align-items: center;
-  margin-bottom: 30rpx;
-  
-  &.special {
-    margin-bottom: 20rpx;
-  }
-}
-
-.section-icon {
-  width: 40rpx;
-  height: 40rpx;
-  margin-right: 16rpx;
+  margin-bottom: 20rpx;
 }
 
 .section-title {
-  font-size: 32rpx;
-  font-weight: bold;
-  color: #333;
-  margin-right: 20rpx;
-}
-
-.section-subtitle {
-  font-size: 24rpx;
-  color: #999;
-}
-
-.product-swiper {
-  height: 380rpx;
-  
-  ::v-deep .uni-swiper-dot {
-    width: 12rpx;
-    height: 12rpx;
-    border-radius: 6rpx;
-    
-    &.uni-swiper-dot-active {
-      width: 32rpx !important;
-    }
-  }
-}
-
-.swiper-page {
-  display: flex;
-  gap: 20rpx;
-  padding: 0 30rpx;
-}
-
-.product-card {
-  flex: 1;
-  width: 220rpx;
-}
-
-.product-image {
-  width: 100%;
-  height: 220rpx;
-  border-radius: 12rpx;
-  margin-bottom: 16rpx;
-}
-
-.product-name {
-  display: block;
-  font-size: 26rpx;
-  color: #333;
-  margin-bottom: 12rpx;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.product-footer {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 8rpx;
-}
-
-.product-price {
-  font-size: 32rpx;
-  color: #e64340;
-  font-weight: bold;
-}
-
-.add-cart-btn {
-  width: 48rpx;
-  height: 48rpx;
-  background-color: #e64340;
-  border-radius: 50%;
   display: flex;
   align-items: center;
-  justify-content: center;
-}
-
-.cart-icon {
-  width: 28rpx;
-  height: 28rpx;
-}
-
-.product-desc {
-  font-size: 22rpx;
-  color: #999;
-}
-
-.hot-swiper {
-  height: 700rpx;
-  
-  ::v-deep .uni-swiper-dot {
-    width: 12rpx;
-    height: 12rpx;
-    border-radius: 6rpx;
-    
-    &.uni-swiper-dot-active {
-      width: 32rpx !important;
-    }
-  }
-}
-
-.hot-list {
-  display: flex;
-  flex-direction: column;
-  gap: 24rpx;
-  padding: 0 30rpx;
-}
-
-.hot-item {
-  display: flex;
-  gap: 24rpx;
-  position: relative;
-}
-
-.hot-badge {
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: 80rpx;
-  height: 80rpx;
-  z-index: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  
-  &.badge-new {
-    background-color: #ff6b35;
-  }
-  
-  &.badge-hot {
-    background-color: #ffb800;
-  }
-}
-
-.badge-label {
-  font-size: 22rpx;
-  color: #fff;
-  font-weight: bold;
-}
-
-.hot-image {
-  width: 200rpx;
-  height: 200rpx;
-  border-radius: 12rpx;
-  flex-shrink: 0;
-}
-
-.hot-info {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-}
-
-.hot-name {
-  font-size: 28rpx;
-  color: #333;
-  line-height: 1.4;
-}
-
-.hot-footer {
-  display: flex;
-  align-items: flex-end;
-  gap: 20rpx;
-}
-
-.price-box {
-  display: flex;
-  align-items: baseline;
-}
-
-.hot-price {
-  font-size: 36rpx;
-  color: #e64340;
-  font-weight: bold;
-}
-
-.hot-unit {
-  font-size: 24rpx;
-  color: #e64340;
-}
-
-.hot-tags {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
   gap: 8rpx;
 }
 
-.tag {
-  display: inline-block;
-  padding: 4rpx 12rpx;
-  background-color: #f5f5f5;
-  font-size: 20rpx;
-  color: #999;
-  border-radius: 4rpx;
+.fire-icon, .crown-icon {
+  font-size: 32rpx;
 }
 
-.special-tags {
-  display: flex;
-  gap: 20rpx;
-  margin-bottom: 30rpx;
+.title-text {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
 }
 
-.special-tag {
-  padding: 8rpx 24rpx;
-  background-color: #fff5f0;
-  color: #ff6b35;
+.title-desc {
   font-size: 24rpx;
-  border-radius: 4rpx;
-  border: 2rpx solid #ff6b35;
+  color: #999;
+  margin-left: 12rpx;
 }
 
-.special-swiper {
-  height: 560rpx;
-  
-  ::v-deep .uni-swiper-dot {
-    width: 12rpx;
-    height: 12rpx;
-    border-radius: 6rpx;
-    
-    &.uni-swiper-dot-active {
-      width: 32rpx !important;
-    }
-  }
+.product-swiper {
+  height: 340rpx;
 }
 
-.product-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 20rpx;
-  padding: 0 30rpx;
+.product-list {
+  display: flex;
+  justify-content: space-between;
+  padding: 0 10rpx;
 }
 
-.grid-item {
+.product-item {
+  width: 200rpx;
   display: flex;
   flex-direction: column;
 }
 
-.grid-image {
-  width: 100%;
+.product-image {
+  width: 200rpx;
   height: 200rpx;
   border-radius: 12rpx;
-  margin-bottom: 12rpx;
+  background: #f9f9f9;
 }
 
-.grid-name {
+.product-name {
   font-size: 24rpx;
   color: #333;
-  margin-bottom: 12rpx;
+  margin-top: 12rpx;
   overflow: hidden;
   text-overflow: ellipsis;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   line-height: 1.4;
-  min-height: 68rpx;
 }
 
-.grid-footer {
+.product-price-row {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  margin-bottom: 8rpx;
+  margin-top: 8rpx;
+  gap: 8rpx;
 }
 
-.grid-price {
+.product-price {
   font-size: 28rpx;
-  color: #e64340;
+  color: #f60808;
   font-weight: bold;
 }
 
-.grid-unit {
-  font-size: 20rpx;
-  color: #e64340;
+.product-origin-price {
+  font-size: 22rpx;
+  color: #999;
+  text-decoration: line-through;
 }
 
-.grid-desc {
+.cart-btn {
+  margin-left: auto;
+  width: 44rpx;
+  height: 44rpx;
+  border-radius: 50%;
+  border: 1rpx solid #f60808;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dots-indicator {
+  display: flex;
+  justify-content: center;
+  gap: 12rpx;
+  margin-top: 20rpx;
+  
+  .dot {
+    width: 12rpx;
+    height: 12rpx;
+    border-radius: 50%;
+    background: #ddd;
+    
+    &.active {
+      background: #f60808;
+      width: 24rpx;
+      border-radius: 6rpx;
+    }
+  }
+}
+
+.hot-swiper {
+  height: 480rpx;
+}
+
+.hot-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.hot-item {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  padding: 16rpx 0;
+  border-bottom: 1rpx solid #f5f5f5;
+  
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.hot-rank {
+  width: 60rpx;
+}
+
+.rank-badge {
+  font-size: 20rpx;
+  font-weight: bold;
+  color: #fff;
+  padding: 4rpx 8rpx;
+  border-radius: 6rpx;
+  text-align: center;
+  
+  &.rank-1 {
+    background: linear-gradient(135deg, #f60808, #ff7875);
+  }
+  &.rank-2 {
+    background: linear-gradient(135deg, #ff7a45, #ffa940);
+  }
+  &.rank-3 {
+    background: linear-gradient(135deg, #ffc53d, #ffe58f);
+    color: #8c6e00;
+  }
+  &.rank-4, &.rank-5, &.rank-6 {
+    background: #e8e8e8;
+    color: #8c8c8c;
+  }
+}
+
+.hot-image {
+  width: 140rpx;
+  height: 140rpx;
+  border-radius: 12rpx;
+  background: #f9f9f9;
+}
+
+.hot-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+}
+
+.hot-name {
+  font-size: 26rpx;
+  color: #333;
+  line-height: 1.4;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.hot-price-row {
+  display: flex;
+  align-items: baseline;
+}
+
+.hot-price {
+  font-size: 32rpx;
+  color: #f60808;
+  font-weight: bold;
+}
+
+.hot-unit {
+  font-size: 22rpx;
+  color: #f60808;
+}
+
+.hot-tags {
+  display: flex;
+  gap: 16rpx;
+}
+
+.hot-origin-price {
+  font-size: 22rpx;
+  color: #999;
+  text-decoration: line-through;
+}
+
+.hot-stock {
+  font-size: 22rpx;
+  color: #999;
+}
+
+.hot-cart {
+  width: 56rpx;
+  height: 56rpx;
+  border-radius: 50%;
+  border: 1rpx solid #f60808;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.special-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12rpx;
+}
+
+.special-tags {
+  display: flex;
+  gap: 20rpx;
+}
+
+.special-tag {
+  font-size: 24rpx;
+  color: #999;
+}
+
+.special-swiper {
+  height: 560rpx;
+}
+
+.special-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16rpx;
+}
+
+.special-item {
+  width: calc(33.33% - 12rpx);
+  display: flex;
+  flex-direction: column;
+}
+
+.special-image {
+  width: 100%;
+  height: 180rpx;
+  border-radius: 12rpx;
+  background: #f9f9f9;
+}
+
+.special-name {
+  font-size: 22rpx;
+  color: #333;
+  margin-top: 12rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  line-height: 1.4;
+}
+
+.special-price-row {
+  display: flex;
+  align-items: center;
+  margin-top: 8rpx;
+}
+
+.special-price {
+  font-size: 28rpx;
+  color: #f60808;
+  font-weight: bold;
+}
+
+.special-unit {
+  font-size: 20rpx;
+  color: #f60808;
+}
+
+.special-cart {
+  margin-left: auto;
+  width: 36rpx;
+  height: 36rpx;
+  border-radius: 50%;
+  border: 1rpx solid #f60808;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.special-origin-price {
   font-size: 20rpx;
   color: #999;
+  text-decoration: line-through;
 }
 
 .footer-info {
-  padding: 40rpx 30rpx;
-  text-align: center;
-  background-color: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 40rpx 20rpx 60rpx;
+  gap: 8rpx;
 }
 
-.footer-text {
-  display: block;
+.company-name {
   font-size: 24rpx;
   color: #999;
-  line-height: 2;
 }
 
+.company-desc {
+  font-size: 22rpx;
+  color: #bbb;
+}
 </style>

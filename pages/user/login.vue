@@ -25,9 +25,10 @@
     <view class="btn-area">
       <button class="login-btn" @getuserinfo="handleGetUserInfo" @click="handleLogin" :loading="loading"
         :disabled="loading">
-        <image class="wechat-icon"
+        <uni-icons type="chat" size="20" color="#fff"></uni-icons>
+        <!-- <image class="wechat-icon"
           src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0id2hpdGUiPjxwYXRoIGQ9Ik04LjUgMUM0LjYgMSAxLjUgMy44IDEuNSA3LjRjMCAyLjEgMS4xIDQgMi44IDUuMi0uMS42LS40IDEuNC0uNSAxLjUuOS4zIDIuMS42IDIuNS41IDEuNSAxLjEgMy4zIDEuNyA1LjIgMS43aC41YzAtLjIuMS0uNC4xLS42IDAtMy41IDMuMS02LjQgNy02LjRoLjFjMC00LjMtNC42LTcuOC0xMC43LTcuOHptMTMuMiA4LjRjLTMuNSAwLTYuNCAyLjYtNi40IDUuOCAwIDEuOC45IDMuNCAyLjQgNC41LS4zIDEuMS0xIDEuNy0xLjEgMS44IDEuMS4zIDIuNS4xIDMuNC0uNS41LjIgMS4xLjMgMS43LjMgMy41IDAgNi40LTIuNiA2LjQtNS44IDAtMy4yLTIuOS01LjgtNi40LTUuOHoiLz48L3N2Zz4="
-          mode="aspectFit"></image>
+          mode="aspectFit"></image> -->
         <text>微信授权登录</text>
       </button>
     </view>
@@ -84,9 +85,9 @@ export default {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  max-height: 100vh;
+  height: 100vh;
   background-color: #ffffff;
-  padding-top: 100rpx;
+  padding-bottom: 60rpx;
 }
 
 .logo-area {
