@@ -1,12 +1,15 @@
 <template>
   <view class="member-page">
     <!-- 顶部状态栏 -->
-    <custom-navbar title="会员中心" textAlign="left" />
+    <custom-navbar
+      title="会员中心"
+      iconColor="#fff"
+      :showBack="false"
+      color="#fff"
+      textAlign="left"
+    />
     <!-- 红色头部区域 -->
-    <view
-      class="header-section"
-      :style="{ marginTop: getTopHeight() - 5 + 'px' }"
-    >
+    <view class="header-section">
       <!-- 用户信息 -->
       <view class="user-info">
         <image
@@ -75,7 +78,9 @@
         >
           <view class="tab-icon-wrap">
             <image class="tab-icon" :src="item.icon"></image>
-            <view v-if="isLogin && item.badge" class="badge">{{ item.badge }}</view>
+            <view v-if="isLogin && item.badge" class="badge">{{
+              item.badge
+            }}</view>
           </view>
           <text class="tab-label">{{ item.label }}</text>
         </view>
@@ -217,13 +222,13 @@ export default {
         },
       ],
       wallet: {
-        hongbaoNum: '-',
-        kaquanNum: '-',
-        ljtx: '-',
+        hongbaoNum: "-",
+        kaquanNum: "-",
+        ljtx: "-",
         remark: "-",
-        userId: '-',
-        zhye: '-',
-        zsye: '-',
+        userId: "-",
+        zhye: "-",
+        zsye: "-",
       },
       isLogin: false,
     };
@@ -247,12 +252,11 @@ export default {
   },
   watch: {
     userInfo(newVal) {
-      console.log('用户', newVal)
       if (newVal) {
         this.getOrderCount();
         this.getWallt();
       }
-    }
+    },
   },
   computed: {
     ...mapState("user", ["userInfo"]),
@@ -263,10 +267,10 @@ export default {
     getLogin() {
       const that = this;
       if (this.userInfo && this.userInfo.userId) return;
-      
-      uni.redirectTo({ url: '/pages/user/login' });
-      return
-      
+
+      uni.redirectTo({ url: "/pages/user/login" });
+      return;
+
       uni.login({
         provider: "weixin", //使用微信登录
         success: async function (loginRes) {
@@ -277,7 +281,7 @@ export default {
             logonType: 1,
           });
           uni.hideLoading();
-          that.isLogin = true
+          that.isLogin = true;
 
           that.getOrderCount();
           that.getWallt();
@@ -292,7 +296,6 @@ export default {
       const res = await orderCount({ sjid: this.userInfo.data.sjId });
       const { dfkCount, dfhCount, dshCount, ywcCount } = res.data;
       const count = [dfkCount, dfhCount, dshCount, ywcCount];
-      console.log('getOrderCount用户信息', this.userInfo)
 
       this.orderTabs = this.orderTabs.map((item, inx) => {
         return {
@@ -303,15 +306,11 @@ export default {
     },
     async getWallt() {
       const res = await getWalltApi({ sjid: this.userInfo.data.sjId });
-      this.wallet = res.data.data || {}
-      console.log("钱包", this.wallet);
-
+      this.wallet = res.data.data || {};
     },
     bannerClick(item) {
-      console.log("广告点击", item);
     },
-    loadUserData() {
-    },
+    loadUserData() {},
     goPage(name, params) {
       const path = {
         setting: "/pages/user/setting",
@@ -363,7 +362,7 @@ export default {
 /* 红色头部区域 */
 .header-section {
   background: linear-gradient(135deg, #f60808 0%, #f60808 100%);
-  padding: 36rpx 32rpx 64rpx;
+  padding: 20rpx 32rpx 64rpx;
 }
 
 .header-top {

@@ -1,39 +1,55 @@
 <template>
   <view class="member-page">
     <!-- 顶部状态栏 -->
-    <custom-navbar :showBack="true" title="个人设置" />
+    <custom-navbar
+      :showBack="true"
+      title="个人设置"
+      color="#fff"
+      textAlign="left"
+    />
     <!-- 列表 -->
-    <view class="menu-list" :style="{ marginTop: getTopHeight() - 5 + 'px' }">
+    <view class="menu-list">
       <view class="menu-item menu-item-avatar">
         <view class="menu-left">
           <text class="menu-text">头像</text>
         </view>
         <image
           class="avatar"
-          :src=" userInfo.data.avatar|| '/static/images/user/head.png'"
+          :src="userInfo.data.avatar || '/static/images/user/head.png'"
           mode="aspectFill"
           @click="updateImg"
         ></image>
-        <uni-icons class="close-btn" type="close" size="15" color="#ccc"></uni-icons>
+        <uni-icons
+          class="close-btn"
+          type="close"
+          size="15"
+          color="#ccc"
+        ></uni-icons>
       </view>
       <view class="menu-item">
         <view class="menu-left">
           <text class="menu-text">昵称</text>
         </view>
-        <view class="menu-text flex-1 menu-label" @click="showModalName=true">{{ userInfo.data.yhnc }}</view>
+        <view
+          class="menu-text flex-1 menu-label"
+          @click="showModalName = true"
+          >{{ userInfo.data.yhnc }}</view
+        >
         <image
           class="arrow"
           src="/static/images/user/right.png"
           mode="aspectFill"
-				 @click="showModalName=true"
+          @click="showModalName = true"
         ></image>
       </view>
       <view class="menu-item">
         <view class="menu-left">
           <text class="menu-text">手机号码</text>
         </view>
-        <view class="flex-cc" @click="showModal=true">
-          <view class="menu-text flex-1 menu-label" style="min-width: 80px;">{{ userInfo.data.sjhm }}</view>
+        <view class="flex-cc" @click="showModal = true">
+          <view class="menu-text flex-1 menu-label" style="min-width: 80px">{{
+            userInfo.data.sjhm
+          }}</view>
           <image
             class="arrow"
             src="/static/images/user/right.png"
@@ -45,7 +61,9 @@
         <view class="menu-left">
           <text class="menu-text">会员ID</text>
         </view>
-        <view class="menu-text flex-1 menu-label">{{ userInfo.data.userId }}</view>
+        <view class="menu-text flex-1 menu-label">{{
+          userInfo.data.userId
+        }}</view>
         <!-- <image
           class="arrow"
           src="/static/images/user/right.png"
@@ -57,18 +75,23 @@
         <view class="menu-left">
           <text class="menu-text">性别</text>
         </view>
-				<!-- <picker class="flex-1" @change="bindPickerChange" :value="sexIndex" :range="sexRange"> -->
-				<picker class="flex-1" @change="bindPickerChange" :value="userInfo.data.sex" :range="sexRange">
-				<!-- <picker class="flex-1" @change="bindPickerChange" :value="sexIndex" :range="sexRange"> -->
-					<view class="menu-text flex-1 menu-label" style="text-align: right;">
-						<text>{{sexRange[sexIndex]}}</text>
-						<image
-							class="arrow"
-							src="/static/images/user/right.png"
-							mode="aspectFill"
-						></image>
-					</view>
-			 </picker>
+        <!-- <picker class="flex-1" @change="bindPickerChange" :value="sexIndex" :range="sexRange"> -->
+        <picker
+          class="flex-1"
+          @change="bindPickerChange"
+          :value="userInfo.data.sex"
+          :range="sexRange"
+        >
+          <!-- <picker class="flex-1" @change="bindPickerChange" :value="sexIndex" :range="sexRange"> -->
+          <view class="menu-text flex-1 menu-label" style="text-align: right">
+            <text>{{ sexRange[sexIndex] }}</text>
+            <image
+              class="arrow"
+              src="/static/images/user/right.png"
+              mode="aspectFill"
+            ></image>
+          </view>
+        </picker>
       </view>
     </view>
     <view class="logout" @click="logoutHandle">退出登录</view>
@@ -79,13 +102,13 @@
       @close="showModal = false"
       @save="handleSave"
     />
-		<!-- 修改名称 -->
-		<modal-name
-			:visible="showModalName"
-			:name="userInfo.data.yhnc"
-			@close="showModalName = false"
-			@save="handleSave"
-		/>
+    <!-- 修改名称 -->
+    <modal-name
+      :visible="showModalName"
+      :name="userInfo.data.yhnc"
+      @close="showModalName = false"
+      @save="handleSave"
+    />
   </view>
 </template>
 
@@ -100,14 +123,14 @@ export default {
   components: {
     CustomNavbar,
     ModalPhone,
-		ModalName,
+    ModalName,
   },
   data() {
     return {
       sexIndex: 0,
-      sexRange: ['未知', '男', '女' ],
+      sexRange: ["未知", "男", "女"],
       statusBarHeight: 0,
-			showModalName: false,
+      showModalName: false,
       showModal: false,
       info: {
         userPhone: "18812345678",
@@ -119,8 +142,8 @@ export default {
     const systemInfo = uni.getSystemInfoSync();
     this.statusBarHeight = systemInfo.statusBarHeight;
   },
-  onShow(){
-    this.sexIndex = this.userInfo.data.sex || 0
+  onShow() {
+    this.sexIndex = this.userInfo.data.sex || 0;
   },
   computed: {
     ...mapState("user", ["userInfo"]),
@@ -128,55 +151,52 @@ export default {
   methods: {
     ...mapActions("user", ["logout", "updateUserInfo", "getUserInfo"]),
     getTopHeight: getNavBarHeight,
-		bindPickerChange(e) {
-      const val = e.detail.value
-		  this.sexIndex = val;
-      this.handleSave({ sex: val })
-		},
+    bindPickerChange(e) {
+      const val = e.detail.value;
+      this.sexIndex = val;
+      this.handleSave({ sex: val });
+    },
     async handleSave(record) {
-      await this.updateUserInfo({ ...this.userInfo.data, ...record })
+      await this.updateUserInfo({ ...this.userInfo.data, ...record });
       uni.showToast({
-        title: '修改成功！',
-        icon: 'success',
-        mask: true
-      })
-      this.userInfo.data = { ...this.userInfo.data, ...record}
-      
+        title: "修改成功！",
+        icon: "success",
+        mask: true,
+      });
+      this.userInfo.data = { ...this.userInfo.data, ...record };
+
       this.showModal = false;
       this.showModalName = false;
-      console.log(" 保存信息", record);
+      uni.hideLoading()
     },
     updateImg() {
       uni.chooseImage({
         count: 1,
-        sizeType: ['original', 'compressed'],
-        sourceType: ['album', 'camera'],
+        sizeType: ["original", "compressed"],
+        sourceType: ["album", "camera"],
         success: async (res) => {
+          uni.showLoading({ title: '加载中...' })
+
           const tempFilePaths = res.tempFilePaths;
-          console.log("选择的图片", tempFilePaths);
           const filePath = tempFilePaths[0];
 
-          const uploadRes = await this.$http.uploadFile({
-            // 测试
-            url: '/upload/avatar/aaaaaaa',
+          const uploadRes = await uni.uploadFile({
+            url: "https://cxjpft.zxdr.cc/blade-resource/oss/endpoint/uploadImg",
             filePath: filePath,
-            name: 'avatar',
+            name: "file",
           });
 
-          const data = JSON.parse(uploadRes.data);
+          const data = JSON.parse(uploadRes[1].data);
           if (data.code === 200) {
-            // 假设返回的图片URL在data.url中
-            // 测试
-            const avatarUrl = data.data.url; 
-            
+            const avatarUrl = data.data[0].link;
             await this.handleSave({ avatar: avatarUrl });
           } else {
             uni.showToast({
-              title: '上传失败',
-              icon: 'none'
+              title: "上传失败",
+              icon: "none",
             });
           }
-        }
+        },
       });
     },
     async logoutHandle() {
@@ -234,7 +254,6 @@ export default {
 /* 菜单列表 */
 .menu-list {
   background: #ffffff;
-  margin-top: 20rpx;
   padding: 0 32rpx;
 }
 
