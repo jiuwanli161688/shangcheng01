@@ -157,7 +157,8 @@ export default {
       this.handleSave({ sex: val });
     },
     async handleSave(record) {
-      await this.updateUserInfo({ ...this.userInfo.data, ...record });
+      // await this.updateUserInfo({ ...this.userInfo.data, ...record });
+      await this.updateUserInfo({ ...record });
       uni.showToast({
         title: "修改成功！",
         icon: "success",

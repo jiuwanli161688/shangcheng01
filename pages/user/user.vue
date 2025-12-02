@@ -22,7 +22,7 @@
         <view class="user-details">
           <template v-if="isLogin">
             <view class="name-row">
-              <text class="username">{{ userInfo.data.yhnc }}</text>
+              <text class="username">{{ userInfo.data.yhnc.length > 5 ? userInfo.data.yhnc.slice(0, 5) +'...' : userInfo.data.yhnc }}</text>
               <view class="vip-badge">
                 <image
                   class="vip-icon"
@@ -266,7 +266,7 @@ export default {
     getTopHeight: getNavBarHeight,
     getLogin() {
       const that = this;
-      if (this.userInfo && this.userInfo.userId) return;
+      if (this.userInfo && this.userInfo.userId || this.isLogin) return;
 
       uni.redirectTo({ url: "/pages/user/login" });
       return;
