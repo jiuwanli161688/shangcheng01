@@ -92,7 +92,13 @@ export default {
         this.$showToast('手机号不能为空')
         return
       }
-
+      // 手机号格式校验
+      const phoneReg = /^1[3-9]\d{9}$/
+      if (!phoneReg.test(this.userPhone)) {
+        this.$showToast('请输入正确的11位手机号')
+        return
+      }
+      
       try {
         this.$showLoading('发送中...')
 
@@ -135,6 +141,12 @@ export default {
     handleSave() {
       if (!this.verifyCode) {
         this.$showToast('请输入验证码')
+        return
+      }
+      // 手机号格式校验
+      const phoneReg = /^1[3-9]\d{9}$/
+      if (!phoneReg.test(this.userPhone)) {
+        this.$showToast('请输入正确的11位手机号')
         return
       }
       
